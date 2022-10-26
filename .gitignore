@@ -32,6 +32,6 @@ backend/.env.development.local
 backend/.env.test.local
 backend/.env.production.local
 backend/npm-debug.log*
-.env.
+.env
 npm-debug.log*
 package-lock.json
