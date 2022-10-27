@@ -1,5 +1,8 @@
 import express, { Application, NextFunction, Request, Response} from 'express'
 import * as dotenv from 'dotenv'
+import { requireLogin} from './middleware/authentication';
+import { route as loginRoutes } from './routes/loginRoutes';
+import path from 'path';
 
 // *** CONFIG *** //
 dotenv.config();
@@ -10,9 +13,13 @@ const app: Application = express();
 // *** MIDDLEWARE AND STUFF *** //
 app.set('view engine', 'pug')
 app.set('views', 'views')
+app.use(express.static(path.join(__dirname, 'public'))) //CSS from public
+
 
 // *** ROUTES *** //
-app.get('/', (req: Request, res: Response, next: NextFunction) => {
+app.use('/login', loginRoutes)
+
+app.get('/', requireLogin, (req: Request, res: Response, next: NextFunction) => {
 
     const payload: Object = {
         pageTitle : "Home page"
@@ -24,11 +31,6 @@ app.get('/', (req: Request, res: Response, next: NextFunction) => {
 })
 
 
-app.get('/h', (req: Request, res: Response, next: NextFunction) => { 
-    res.status(200)
-    res.send("BBBBBBBBBBBBB")
-})
-
 //*** 404 ***//
 app.all('*', (req: Request, res: Response, next: NextFunction) => {
     const error = {
@@ -38,7 +40,7 @@ app.all('*', (req: Request, res: Response, next: NextFunction) => {
 
     res.status(404)
     res.send(error);
-});
+})
 
 
 //*** BEEP BOOP ***//
