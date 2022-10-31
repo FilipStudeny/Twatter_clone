@@ -4,6 +4,7 @@ import { requireLogin} from './middleware/authentication';
 import { route as loginRoutes } from './routes/loginRoutes';
 import path from 'path';
 import bodyParser from "body-parser";
+import mongoose, { ConnectOptions } from 'mongoose';
 
 // *** CONFIG *** //
 dotenv.config();
@@ -47,6 +48,18 @@ app.all('*', (req: Request, res: Response, next: NextFunction) => {
     res.send(error);
 })
 
+
+// *** MONGO *** //
+const url = process.env.MONGO_URL;
+const options = {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    family: 4 // Use IPv4, skip trying IPv6
+}
+mongoose.Promise = global.Promise;
+mongoose.connect(url!, options as ConnectOptions)
+        .then(() => {console.log("Connected to MongoDB")})
+        .catch((err) => console.log(err));
 
 //*** BEEP BOOP ***//
 app.listen(PORT, () => {
