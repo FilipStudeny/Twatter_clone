@@ -5,17 +5,23 @@ import { route as userRoutes } from './routes/userRoutes';
 import path from 'path';
 import bodyParser from "body-parser";
 import { Database } from './controllers/Database';
+import session from 'express-session';
 
 // *** CONFIG *** //
 dotenv.config();
 
-const PORT: any = process.env.PORT;
+const PORT: any = 8888;
 const app: Application = express();
 const url: any = process.env.MONGO_URL;
 const mongoDB = new Database(url);
 
 // *** MIDDLEWARE AND STUFF *** //
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(session({ //EXPRESS sessions
+    secret: "beepboop", //hash
+    resave: true, //session forced to save
+    saveUninitialized: false //prevents session from being saved as uninitiblabla
+}))
 
 //app.use(bodyParser.json()); //NEEDS TO RECEIVE DATA IN JSON FORMAT 
 
@@ -27,10 +33,11 @@ app.use(express.static(path.join(__dirname, 'public'))) //CSS from public
 // *** ROUTES *** //
 app.use('/', userRoutes)
 
-app.get('/', requireLogin, (req: Request, res: Response, next: NextFunction) => {
+app.get('/', requireLogin, (req: any, res: Response, next: NextFunction) => {
 
     const payload: Object = {
-        pageTitle : "Home page"
+        pageTitle : "Home page",
+        userLoggedIn: req.session.user
     }
 
     res.status(200)
