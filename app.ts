@@ -2,10 +2,13 @@ import express, { Application, NextFunction, Request, Response} from 'express'
 import * as dotenv from 'dotenv'
 import { requireLogin} from './middleware/authentication';
 import { route as userRoutes } from './routes/userRoutes';
+import { route as postRoutes } from './routes/postsRoutes';
+
 import path from 'path';
 import bodyParser from "body-parser";
 import { Database } from './controllers/Database';
 import session from 'express-session';
+
 
 // *** CONFIG *** //
 dotenv.config();
@@ -32,12 +35,14 @@ app.use(express.static(path.join(__dirname, 'public'))) //CSS from public
 
 // *** ROUTES *** //
 app.use('/', userRoutes)
+app.use('/posts/', postRoutes)
 
 app.get('/', requireLogin, (req: any, res: Response, next: NextFunction) => {
 
     const payload: Object = {
         pageTitle : "Home page",
-        userLoggedIn: req.session.user
+        userLoggedIn: req.session.user,
+        userLoggedInJS: JSON.stringify(req.session.user)
     }
 
     res.status(200)

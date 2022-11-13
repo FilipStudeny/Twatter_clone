@@ -56,6 +56,17 @@ route.post('/login', async (req: any, res: Response, next: NextFunction) => {
 
 })
 
+route.get('/logout',  async (req: any, res: Response, next: NextFunction) => {
+
+    if(req.session){
+        req.session.destroy(() => {
+            res.redirect('/login');
+        });
+    }
+
+})
+
+
 route.get('/register',  (req: Request, res: Response, next: NextFunction) => {
     const payload: Object = {
         pageTitle : "Register page"
