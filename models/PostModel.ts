@@ -7,7 +7,9 @@ const postSchema = new Schema({
     'pinnedPost' : Boolean,
     'likes': [{ type: Schema.Types.ObjectId, ref: 'User'}], //Creates array of User objects
     'retweetUsers': [{ type: Schema.Types.ObjectId, ref: 'User'}], //How many users have retweeted post
-    'retweetData': { type: Schema.Types.ObjectId, ref: 'Post'} //Post that is retweeted
+    'retweetData': { type: Schema.Types.ObjectId, ref: 'Post'}, //Post that is retweeted
+    'replyTo': { type: Schema.Types.ObjectId, ref: 'Post'} //Post that is retweeted
+
 },{ timestamps: true });
 
 export const POST: mongoose.Model<any> = mongoose.model("Post", postSchema);

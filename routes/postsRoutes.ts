@@ -1,47 +1,120 @@
 import express, { NextFunction, Request, Response } from 'express'
+import { post } from 'jquery';
 import { requireLogin } from '../middleware/authentication'
 import { POST } from '../models/PostModel';
 import { USER } from '../models/UserModel';
 
 export const route = express.Router();
 
+// *** FUNCTIONS *** //
+const getPosts = async (filter?: any) => {
+    var results = await POST.find(filter)
+        .populate("postedBy")
+        .populate("retweetData")
+        .populate("replyTo")
+        .sort({
+            "createdAt":-1 //Descending order
+        })
+        .catch( (err) => {
+            console.log(err);
+        })
+
+    results = await USER.populate(results, { path: 'replyTo.postedBy' });
+    return await USER.populate(results, { path: 'retweetData.postedBy' });
+
+}
 
 // *** ROUTES *** //
 route.get('/',  async (req: any, res: Response, next: NextFunction) => {
+
+    let searchForPosts = req.query;
+
+    if(searchForPosts.isReply !== undefined){
+        const isReply = searchForPosts.isReply == 'true';
+        searchForPosts.replyTo = { $exists: isReply }
+        delete searchForPosts.isReply;
+    }
+
+    //GET POSTS FROM USER YOU FOLLOW
+    if(searchForPosts.followingOnly !== undefined){
+        const followingOnly = searchForPosts.followingOnly == 'true';
+        if(followingOnly){
+            let objectIDs = [];
+
+            if(!req.session.user.following){
+                req.session.user.following = [];
+            }
+            
+            req.session.user.following.forEach((user: any) => {
+                objectIDs.push(user)
+            })
+
+            objectIDs.push(req.session.user._id); //SHOWS OUR OWN POSTS ON HOME PAGE
     
-    POST.find()
-    .populate("postedBy")
-    .populate("retweetData")
-    .sort({
-        "createdAt":-1 //Descending order
-    })
-    .then( async (results) => {
-        results = await USER.populate(results, { path: 'retweetData.postedBy' });
-        res.status(200).send(results)
-    })
-    .catch( (err) => {
-        console.log(err);
-        res.status(400);
-    })
+            searchForPosts.postedBy = { $in: objectIDs }
+        }
+        
+        delete searchForPosts.followingOnly;
+    }
+    
+    let results = await getPosts(searchForPosts);
+    return res.status(200).send(results);
+})
+
+route.get('/:id',  async (req: any, res: Response, next: NextFunction) => {
+
+    let postID = req.params.id;
+    let postData = await getPosts({_id: postID});
+    postData = postData[0];
+
+    interface Result{
+        postData: any,
+        replyTo?: any,
+        replies?: any
+    }
+
+    let results: Result = {
+        postData: postData
+    };
+
+
+    if(postData.replyTo !== undefined) {
+        results.replyTo = postData.replyTo;
+    }
+
+    results.replies = await getPosts({ replyTo: postID });
+    res.status(200).send(results);
 
 })
 
+route.get('/post/:id',  async (req: any, res: Response, next: NextFunction) => {
+    const payload: Object = {
+        pageTitle : "Post page",
+        userLoggedIn: req.session.user,
+        userLoggedInJS: JSON.stringify(req.session.user),
+        postID: req.params.id
+    }
+
+    res.status(200)
+    return res.render('post', payload)
+
+})
 
 route.post('/new', async (req: any, res: Response, next: NextFunction) => {
 
     if(!req.body.content){
         console.log("Contontent not send with request");
-        res.status(400).send("Contontent not send with request");
-        return;
+        return res.status(400);
     }
 
-    const content = req.body.content;
-    const postedBy = req.session.user;
-
-    const newPost = new POST({
-        content: content,
-        postedBy: postedBy
+    let newPost = new POST({
+        content: req.body.content,
+        postedBy: req.session.user
     })
+
+    if(req.body.replyTo){
+        newPost.replyTo = req.body.replyTo;
+    }
 
     try {
         await newPost.save();
@@ -108,18 +181,20 @@ route.post('/:id/retweet',  async (req: any, res: Response, next: NextFunction) 
     }
 
     //POST RETWEET
-    req.session.user = await USER.findByIdAndUpdate(userID, { [option]: { 'retweets': repost.id } }, { new: true}) //returns updated likes array into session
+    req.session.user = await USER.findByIdAndUpdate(userID, { [option]: { 'retweets': repost._id } }, { new: true}) //returns updated likes array into session
     .catch( (err) => {
         console.log(err);
         res.sendStatus(400);
     })
 
+    /*
     //USER LIKES
     req.session.user = await USER.findByIdAndUpdate(userID, { [option]: { 'likes': postID } }, { new: true}) //returns updated likes array into session
     .catch( (err) => {
         console.log(err);
         res.sendStatus(400);
     })
+    */
     
     //POST user retweets
     const post = await POST.findByIdAndUpdate(postID, { [option]: { 'retweetUsers': userID } }, { new: true}) //returns updated likes array 
@@ -132,8 +207,13 @@ route.post('/:id/retweet',  async (req: any, res: Response, next: NextFunction) 
 
 })
 
-route.post('/delete',  async (req: any, res: Response, next: NextFunction) => {
-
+route.delete('/delete/:id',  async (req: any, res: Response, next: NextFunction) => {
+    POST.findByIdAndDelete(req.params.id)
+    .then(() => res.sendStatus(202))
+    .catch((err) => {
+        console.log(err);
+        res.sendStatus(400);
+    })
 })
 
 
