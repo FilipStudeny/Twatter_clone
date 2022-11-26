@@ -34,7 +34,7 @@ app.use(express.static(path.join(__dirname, 'public'))) //CSS from public
 
 
 // *** ROUTES *** //
-app.use('/', userRoutes)
+app.use('/',  userRoutes)
 app.use('/posts/', requireLogin, postRoutes)
 
 app.get('/', requireLogin, (req: any, res: Response, next: NextFunction) => {

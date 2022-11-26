@@ -1,3 +1,6 @@
+// @ts-ignore
+let cropper;
+
 $("#postTextArea, #replyTextArea",).keyup( (event) => {
     const textbox = $(event.target);
     // @ts-ignore
@@ -223,6 +226,64 @@ $(document).on("click",".post", (event) => {
 
 });
 
+
+$("#filePhoto").change( function(event){
+
+    //@ts-ignore
+    if(this.files && this.files[0]){
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const image = document.getElementById("imagePreview")
+            //@ts-ignore
+            image.src = event.target.result;
+
+            //@ts-ignore
+            if(cropper !== undefined){
+                //@ts-ignore
+                cropper.destroy();
+            }
+            //@ts-ignore
+            cropper = new Cropper(image, {
+                aspectRatio: 1 / 1,
+                background: false
+            });
+
+
+        }
+        //@ts-ignore
+        reader.readAsDataURL(this.files[0])
+    }
+});
+
+$("#imageUploadButton").click( () => {
+    // @ts-ignore
+    const canvas = cropper.getCroppedCanvas();
+    
+    if(canvas == null){
+        alert("Empty area in image cropper.")
+        return
+    }
+
+    // @ts-ignore
+    canvas.toBlob((blob) => { //converts image to binary data
+        const formData = new FormData();
+        formData.append("croppedImage", blob);
+
+        $.ajax({
+            url: "/profile/profilePicture",
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: () => {
+                location.reload();
+            }
+        })
+
+    })
+
+});
+
 // @ts-ignore
 const getPostIDFromElement = (element) => {
     const isRoot = element.hasClass("post");
@@ -281,8 +342,9 @@ const outputPostsWithReplies = (results, container) => {
 const createPostHtml = (postData, largeFont = false) => {
 
 
-    if(postData == null){
+    if(postData.content == null){
         postData.content = "<div class='notAvailable'>This content is not available</div>"
+        
     }
 
     if(postData == null){
@@ -396,6 +458,10 @@ const createPostHtml = (postData, largeFont = false) => {
 
     return html
 }
+
+
+
+
 
 // @ts-ignore
 function timeDifference(current, previous) {

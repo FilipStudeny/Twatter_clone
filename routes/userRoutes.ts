@@ -2,10 +2,15 @@ import express, { NextFunction, Request, Response } from 'express'
 import { requireLogin } from '../middleware/authentication'
 import { USER } from '../models/UserModel';
 import bcrypt from 'bcrypt';
-
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 export const route = express.Router();
 
-
+// *** MULTER CONFIG *** //
+const imageUploader = multer({
+    dest: "uploads/"
+})
 // *** ROUTES *** //
 route.get('/login',  (req: Request, res: Response, next: NextFunction) => {
     const payload: Object = {
@@ -246,7 +251,7 @@ route.get('/user/:userID/followers', requireLogin ,async (req: any, res: Respons
 
 })
 
-route.put('/users/:userID/follow',  async (req: any, res: Response, next: NextFunction) => {
+route.put('/users/:userID/follow', requireLogin, async (req: any, res: Response, next: NextFunction) => {
 
     const userID = req.params.userID;
 
@@ -272,6 +277,37 @@ route.put('/users/:userID/follow',  async (req: any, res: Response, next: NextFu
     })
 
     return res.status(200).send(req.session.user);
+})
+
+route.post('/profile/profilePicture', imageUploader.single("croppedImage") , async (req: any, res: Response, next: NextFunction) => {
+
+    if(!req.file){
+        console.log("No file uploaded with AJAX")
+        return res.sendStatus(400);
+    }
+
+    const filePath = `/uploads/images/${req.file.filename}.png`;
+    const tempPath = req.file.path;
+    const targetPath = path.join(__dirname, `../${filePath}`)
+    fs.rename(tempPath, targetPath, async (err) => {
+        if(err != null){
+            console.log(err)
+            return res.sendStatus(400);
+        }
+
+        req.session.user = await USER.findByIdAndUpdate(req.session.user._id, { 'profilePicture': filePath }, { new: true });
+        
+        return res.sendStatus(204);
+    });
+
+    return
+})
+
+route.get('/uploads/images/:image', (req: Request, res: Response, next: NextFunction) => {
+
+    res.sendFile(path.join(__dirname, `../uploads/images/${req.params.image}`))
+
+
 })
 
 const getPayload = async (username: any, req: any, userLoggedIn: any) => {
