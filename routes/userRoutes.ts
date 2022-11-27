@@ -303,6 +303,30 @@ route.post('/profile/profilePicture', imageUploader.single("croppedImage") , asy
     return
 })
 
+route.post('/profile/coverPhoto', imageUploader.single("croppedImage") , async (req: any, res: Response, next: NextFunction) => {
+
+    if(!req.file){
+        console.log("No file uploaded with AJAX")
+        return res.sendStatus(400);
+    }
+
+    const filePath = `/uploads/images/${req.file.filename}.png`;
+    const tempPath = req.file.path;
+    const targetPath = path.join(__dirname, `../${filePath}`)
+    fs.rename(tempPath, targetPath, async (err) => {
+        if(err != null){
+            console.log(err)
+            return res.sendStatus(400);
+        }
+
+        req.session.user = await USER.findByIdAndUpdate(req.session.user._id, { 'coverPhoto': filePath }, { new: true });
+        
+        return res.sendStatus(204);
+    });
+
+    return
+})
+
 route.get('/uploads/images/:image', (req: Request, res: Response, next: NextFunction) => {
 
     res.sendFile(path.join(__dirname, `../uploads/images/${req.params.image}`))

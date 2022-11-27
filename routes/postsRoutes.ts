@@ -38,6 +38,7 @@ route.get('/',  async (req: any, res: Response, next: NextFunction) => {
     //GET POSTS FROM USER YOU FOLLOW
     if(searchForPosts.followingOnly !== undefined){
         const followingOnly = searchForPosts.followingOnly == 'true';
+
         if(followingOnly){
             let objectIDs = [];
 
@@ -100,10 +101,10 @@ route.get('/post/:id',  async (req: any, res: Response, next: NextFunction) => {
 
 })
 
-route.post('/new', async (req: any, res: Response, next: NextFunction) => {
+route.post('/new', async (req: any, res: Response) => {
 
     if(!req.body.content){
-        console.log("Contontent not send with request");
+        console.log("Content not send with request");
         return res.status(400);
     }
 
@@ -116,6 +117,20 @@ route.post('/new', async (req: any, res: Response, next: NextFunction) => {
         newPost.replyTo = req.body.replyTo;
     }
 
+    POST.create(newPost)
+    .then(async (newPost) => {
+        newPost = await USER.populate(newPost, { path: 'postedBy'})
+        newPost = await POST.populate(newPost, { path: 'replyTo'})
+
+        res.status(201).send(newPost);
+    })
+    .catch((err) => {
+        console.log(err);
+        res.status(400).send('Error, something went wrong !')
+    })
+
+    return
+    /*
     try {
         await newPost.save();
         await USER.populate(newPost, {
@@ -128,7 +143,7 @@ route.post('/new', async (req: any, res: Response, next: NextFunction) => {
         console.log(err);
         return res.status(400).send('Error, something went wrong !')
     }
-
+    */
 })
 
 route.put('/:id/like',  async (req: any, res: Response, next: NextFunction) => {
@@ -180,6 +195,7 @@ route.post('/:id/retweet',  async (req: any, res: Response, next: NextFunction) 
         });
     }
 
+
     //POST RETWEET
     req.session.user = await USER.findByIdAndUpdate(userID, { [option]: { 'retweets': repost._id } }, { new: true}) //returns updated likes array into session
     .catch( (err) => {
@@ -187,14 +203,6 @@ route.post('/:id/retweet',  async (req: any, res: Response, next: NextFunction) 
         res.sendStatus(400);
     })
 
-    /*
-    //USER LIKES
-    req.session.user = await USER.findByIdAndUpdate(userID, { [option]: { 'likes': postID } }, { new: true}) //returns updated likes array into session
-    .catch( (err) => {
-        console.log(err);
-        res.sendStatus(400);
-    })
-    */
     
     //POST user retweets
     const post = await POST.findByIdAndUpdate(postID, { [option]: { 'retweetUsers': userID } }, { new: true}) //returns updated likes array 
@@ -203,6 +211,7 @@ route.post('/:id/retweet',  async (req: any, res: Response, next: NextFunction) 
         res.sendStatus(400);
     })
 
+    console.log(post);
     res.status(200).send(post);
 
 })
@@ -216,4 +225,20 @@ route.delete('/delete/:id',  async (req: any, res: Response, next: NextFunction)
     })
 })
 
+route.put('/pin/:id',  async (req: any, res: Response, next: NextFunction) => {
 
+    if(req.body.pinned !== undefined){
+        await POST.updateMany({ 'postedBy' : req.session.user }, { 'pinned': false })
+        .catch((err) => {
+            console.log(err);
+            res.sendStatus(400);
+        })
+    }
+
+    POST.findByIdAndUpdate(req.params.id, req.body)
+    .then(() => res.sendStatus(204))
+    .catch((err) => {
+        console.log(err);
+        res.sendStatus(400);
+    })
+})

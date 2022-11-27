@@ -111,6 +111,65 @@ $("#deletePostButton").click( (event) => {
     });
 })
 
+$("#confirmPinModal").on("show.bs.modal", (event) => {
+
+    // @ts-ignore
+    const button = $(event.relatedTarget);
+    const postID = getPostIDFromElement(button);
+
+    $("#pinPostButton").data("id", postID);
+
+})
+
+$("#pinPostButton").click( (event) => {
+    // @ts-ignore
+    const postID = $(event.target).data("id");
+
+    // *** AJAX REQUEST *** //
+    $.ajax({
+        url: `/posts/pin/${postID}`,
+        type: "PUT",
+        data: { 'pinned': true },
+        success: (data, sucessMessage, xhr) => {
+            if(xhr.status != 204){
+                alert("Could not pin post.")
+                return;
+            }
+            
+            location.reload();
+        }
+    });
+})
+
+$("#unpinModal").on("show.bs.modal", (event) => {
+
+    // @ts-ignore
+    const button = $(event.relatedTarget);
+    const postID = getPostIDFromElement(button);
+
+    $("#unpinPostButton").data("id", postID);
+
+})
+
+$("#unpinPostButton").click( (event) => {
+    // @ts-ignore
+    const postID = $(event.target).data("id");
+
+    // *** AJAX REQUEST *** //
+    $.ajax({
+        url: `/posts/pin/${postID}`,
+        type: "PUT",
+        data: { 'pinned': false },
+        success: (data, sucessMessage, xhr) => {
+            if(xhr.status != 204){
+                alert("Could not unpin post.")
+                return;
+            }
+            
+            location.reload();
+        }
+    });
+})
 
 $(document).on("click",".likeButton", (event) => {
     const button = $(event.target);
@@ -284,6 +343,62 @@ $("#imageUploadButton").click( () => {
 
 });
 
+
+$("#coverPhoto").change( function(event){
+
+    //@ts-ignore
+    if(this.files && this.files[0]){
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const image = document.getElementById("coverPreview")
+            //@ts-ignore
+            image.src = event.target.result;
+
+            //@ts-ignore
+            if(cropper !== undefined){
+                //@ts-ignore
+                cropper.destroy();
+            }
+            //@ts-ignore
+            cropper = new Cropper(image, {
+                aspectRatio: 16 / 9,
+                background: false
+            });
+        }
+        //@ts-ignore
+        reader.readAsDataURL(this.files[0])
+    }
+});
+
+$("#coverPhotoButton").click( () => {
+    // @ts-ignore
+    const canvas = cropper.getCroppedCanvas();
+    
+    if(canvas == null){
+        alert("Empty area in image cropper.")
+        return
+    }
+
+    // @ts-ignore
+    canvas.toBlob((blob) => { //converts image to binary data
+        const formData = new FormData();
+        formData.append("croppedImage", blob);
+
+        $.ajax({
+            url: "/profile/coverPhoto",
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: () => {
+                location.reload();
+            }
+        })
+
+    })
+
+});
+
 // @ts-ignore
 const getPostIDFromElement = (element) => {
     const isRoot = element.hasClass("post");
@@ -308,11 +423,11 @@ const outputPosts = (results, container) => {
 
     // @ts-ignore
     results.forEach( (result) => {
-        const html = createPostHtml(result);
+        let html = createPostHtml(result);
         container.append(html);
     })
 
-    if( results.length == 0 ){
+    if( results.length  == 0 ){
         container.append("<span class='noResults'> No posts found. </span>");
     }
 }
@@ -341,36 +456,37 @@ const outputPostsWithReplies = (results, container) => {
 // @ts-ignore
 const createPostHtml = (postData, largeFont = false) => {
 
-
-    if(postData.content == null){
-        postData.content = "<div class='notAvailable'>This content is not available</div>"
-        
-    }
-
     if(postData == null){
-        return alert("Post data not populated");
+        return alert("Post object is null");
     }
-    const postedBy = postData.postedBy;
-    const isRetweet = postData.retweetData !== undefined;
-    const retweetedBy = isRetweet ? postData.postedBy.username : null;
 
+    let isRetweet = postData.retweetData !== undefined;
+    let retweetedBy = isRetweet ? postData.postedBy.username : null;
     postData = isRetweet ? postData.retweetData : postData;
+    
+    let postedBy = postData.postedBy;
+
+   
+    if(postData.content == null){
+        return postData.content = "<div class='notAvailable'>This content is not available</div>"
+    }
+
 
     if(postedBy._id === undefined){
         return alert("User object not populated !")
     }
 
-    const username = postedBy.firstName + ' ' + postedBy.lastName;
+    let username = postedBy.firstName + ' ' + postedBy.lastName;
     let timestamp = timeDifference(new Date(), new Date(postData.createdAt));
 
     
     // @ts-ignore
-    const likeButtonActiveClass = postData.likes.includes(userLoggedIn._id) ? "active" : "";
+    let likeButtonActiveClass = postData.likes.includes(userLoggedIn._id) ? "active" : "";
     // @ts-ignore
-    const shareButtonActiveClass = postData.retweetUsers.includes(userLoggedIn._id) ? "active" : "";
-    const largeFontClass = largeFont ? "largeFont" : "";
+    let shareButtonActiveClass = postData.retweetUsers.includes(userLoggedIn._id) ? "active" : "";
+    let largeFontClass = largeFont ? "largeFont" : "";
 
-    let retweetText = " ";
+    let retweetText = "";
     
     if (isRetweet){
         retweetText =
@@ -391,20 +507,41 @@ const createPostHtml = (postData, largeFont = false) => {
         }
 
         let replyToUsername = postData.replyTo.postedBy.username;
-        replyFlag = `
+        replyFlag = 
+        `
         <div class=replyFlag>
             Replying to <a href='/profile/${replyToUsername}'>@${replyToUsername}</a>
-        </div>`;
+        </div>
+        `;
     }
-    console.log(postData)
+
     let buttons = "";
+    let pinnedPostText = '';
     // @ts-ignore
     if(postData.postedBy._id == userLoggedIn._id){
+        let pinnedClass = '';
+        let dataTarget = '#confirmPinModal'
+
+        if(postData.pinned === true){
+            pinnedClass = 'active'
+            pinnedPostText = `
+            <i class='fas fa-thumbtack'></i>
+            <span>Pinned Post</span>
+            `
+            dataTarget = '#unpinModal'
+        }
+
         buttons = `
+        <button class='pinButton ${pinnedClass}' data-id='${postData._id}' data-toggle='modal' data-target='${dataTarget}'>
+            <i class='fas fa-thumbtack'></i>
+        </button>        
         <button data-id='${postData._id}' data-toggle='modal' data-target='#deletePostModal'>
             <i class='fas fa-times'></i>
-        </button>`
+        </button>
+        `
     }
+
+
 
     const html = 
     `<div class='post ${largeFontClass}' data-id='${postData._id}'>
@@ -417,6 +554,9 @@ const createPostHtml = (postData, largeFont = false) => {
                 <img src='${postedBy.profilePicture}'/>
             </div>
             <div class='postContentContainer'>
+                <div class='pinnedPostText'>
+                    ${pinnedPostText}
+                </div>
                 <div class='header'>
                     <a class='displayName' href='/profile/${postedBy.username}'>${username}</a>
                     <span class='username'>@${postedBy.username}</span>
