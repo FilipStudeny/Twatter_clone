@@ -12,6 +12,32 @@ const imageUploader = multer({
     dest: "uploads/"
 })
 // *** ROUTES *** //
+route.get('/users', async (req: Request, res: Response, next: NextFunction) => {
+
+    let searchForUsers = req.query;
+
+    if(req.query.search !== undefined){
+        searchForUsers = {
+            $or: [
+                { firstName: { $regex: req.query.search, $options: 'i' }},
+                { lastName: { $regex: req.query.search, $options: 'i' }},
+                { username: { $regex: req.query.search, $options: 'i' }}
+            ]
+        }
+    }
+
+    USER.find(searchForUsers)
+    .then( (results) => {
+        res.status(200).send(results);
+    })
+    .catch( (err) => {
+        console.log(err)
+        res.sendStatus(404);
+    })
+
+
+})
+
 route.get('/login',  (req: Request, res: Response, next: NextFunction) => {
     const payload: Object = {
         pageTitle : "Login page"

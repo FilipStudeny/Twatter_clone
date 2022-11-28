@@ -35,6 +35,11 @@ route.get('/',  async (req: any, res: Response, next: NextFunction) => {
         delete searchForPosts.isReply;
     }
 
+    if(searchForPosts.search !== undefined){
+        searchForPosts.content = { $regex: searchForPosts.search, $options: 'i' }
+        delete searchForPosts.search;
+    }
+
     //GET POSTS FROM USER YOU FOLLOW
     if(searchForPosts.followingOnly !== undefined){
         const followingOnly = searchForPosts.followingOnly == 'true';
@@ -187,7 +192,7 @@ route.post('/:id/retweet',  async (req: any, res: Response, next: NextFunction) 
     const option = deletedPost != null ? '$pull' : '$addToSet';
     let repost = deletedPost;
 
-    if (repost == null){
+    if (repost === null){
         repost = await POST.create({ 'postedBy': userID, 'retweetData': postID })
         .catch( (err) => {
             console.log(err);
@@ -197,7 +202,7 @@ route.post('/:id/retweet',  async (req: any, res: Response, next: NextFunction) 
 
 
     //POST RETWEET
-    req.session.user = await USER.findByIdAndUpdate(userID, { [option]: { 'retweets': repost._id } }, { new: true}) //returns updated likes array into session
+    req.session.user = await USER.findByIdAndUpdate(userID, { [option]: { 'retweets': postID } }, { new: true}) //returns updated likes array into session
     .catch( (err) => {
         console.log(err);
         res.sendStatus(400);
@@ -242,3 +247,4 @@ route.put('/pin/:id',  async (req: any, res: Response, next: NextFunction) => {
         res.sendStatus(400);
     })
 })
+

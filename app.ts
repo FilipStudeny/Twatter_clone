@@ -47,9 +47,32 @@ app.get('/', requireLogin, (req: any, res: Response, next: NextFunction) => {
 
     res.status(200)
     res.render('home', payload)
-
 })
 
+app.get('/search', requireLogin, (req: any, res: Response, next: NextFunction) => {
+
+    const payload: Object = {
+        pageTitle : "Search",
+        userLoggedIn: req.session.user,
+        userLoggedInJS: JSON.stringify(req.session.user)
+    }
+
+    res.status(200)
+    res.render('search', payload)
+})
+
+app.get('/search/:selectedTab', requireLogin, (req: any, res: Response, next: NextFunction) => {
+
+    const payload: Object = {
+        pageTitle : "Search",
+        userLoggedIn: req.session.user,
+        userLoggedInJS: JSON.stringify(req.session.user),
+        selectedTab: req.params.selectedTab
+    }
+
+    res.status(200)
+    res.render('search', payload)
+})
 
 //*** 404 ***//
 app.all('*', (req: Request, res: Response, next: NextFunction) => {
