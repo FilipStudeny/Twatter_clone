@@ -1,5 +1,3 @@
-//@ts-ignore
-let timer;
 
 //@ts-ignore
 $("#searchBox").keydown( (event) => {

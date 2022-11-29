@@ -1,5 +1,9 @@
 // @ts-ignore
 let cropper;
+// @ts-ignore
+var timer;
+// @ts-ignore
+let selectedUsers = [];
 
 $("#postTextArea, #replyTextArea",).keyup( (event) => {
     const textbox = $(event.target);
@@ -399,6 +403,120 @@ $("#coverPhotoButton").click( () => {
 
 });
 
+
+//@ts-ignore
+$("#userSearchTextBox").keydown( (event) => {
+    //@ts-ignore
+    clearTimeout(timer);
+    const textBox = $(event.target);
+
+    //@ts-ignore
+    let value = textBox.val();
+    const searchType = textBox.data().search
+
+    //@ts-ignore
+    if(value == "" && (event.which == 8 || event.keyCode == 8)){
+        //remove user from selection
+        //@ts-ignore
+        selectedUsers.pop();
+        updateSelectedUsersHtml();
+        $('.resultsContainer').html('');
+        
+        if(selectedUsers.length == 0){
+            $('#createChatButton').prop('disabled', true);
+        }
+
+        return;
+    }
+
+    timer = setTimeout(() => {
+        //@ts-ignore
+        value = textBox.val().trim();
+
+        if(value == ''){
+            $(".resultsContainer").html("")
+        }else{
+            searchUsers(value);
+        }
+    }, 1000)
+})
+
+$("#createChatButton").click( () => {
+    // @ts-ignore
+    const data = JSON.stringify(selectedUsers);
+    
+    $.post('/messages/chat', { users: data }, chat => {
+
+        if(!chat || !chat._id){
+            return alert('Invalid response from server');
+        }
+
+
+        window.location.href = `/messages/${chat._id}`;
+    });
+
+});
+
+// @ts-ignore
+const searchUsers = (searchTerm) => {
+    // @ts-ignore
+    $.get('/users/', {search: searchTerm}, results => {
+
+        outputSelectableUsers(results, $('.resultsContainer'))
+
+    });
+}
+
+// @ts-ignore
+const outputSelectableUsers = (result, container) => {
+    container.html("")
+    // @ts-ignore
+    result.forEach(result => {
+
+        // @ts-ignore
+        if(result._id == userLoggedIn._id || selectedUsers.some(u => u._id == result._id)) {
+            return  
+        } 
+
+        const html = createUserHTML(result, false)
+        const element = $(html);
+        element.click( () => userSelected(result));
+
+        container.append(element);
+    });
+
+    // @ts-ignore
+    if(result.length == 0){
+        container.append("<span class='noResults'>No results found</span>")
+    }
+
+}
+
+// @ts-ignore
+const userSelected = (user) => {
+    selectedUsers.push(user);
+    updateSelectedUsersHtml()
+    $('#userSearchTextBox').val('').focus();
+    $('.resultsContainer').html('');
+    $('#createChatButton').prop('disabled', false);
+}
+
+const updateSelectedUsersHtml = () => {
+    // @ts-ignore
+    const elements = [];
+
+    // @ts-ignore
+    selectedUsers.forEach( (user) => {
+        const name = user.firstName + ' ' + user.lastName;
+        const userElement = $(`<span class='selectedUser'>${name}</span>`)
+        elements.push(userElement);
+    })
+
+    $('.selectedUser').remove();
+    // @ts-ignore
+    $('#selectedUsers').prepend(elements);
+};
+
 // @ts-ignore
 const getPostIDFromElement = (element) => {
     const isRoot = element.hasClass("post");
@@ -452,7 +570,6 @@ const outputPostsWithReplies = (results, container) => {
     })
 
 }
-
 
 // @ts-ignore
 const outputUsers = (data, container) => {
@@ -517,18 +634,7 @@ const createPostHtml = (postData, largeFont = false) => {
 
     let isRetweet = postData.retweetData !== undefined;
     let retweetedBy = isRetweet ? postData.postedBy.username : null;
-
-    console.log(postData);
-
     postData = isRetweet ? postData.retweetData : postData;
-    if(isRetweet){
-        //console.log(postData);
-
-    }
-
-
-   
-
     let postedBy = postData.postedBy;
 
    
@@ -663,10 +769,6 @@ const createPostHtml = (postData, largeFont = false) => {
 
     return html
 }
-
-
-
-
 
 // @ts-ignore
 function timeDifference(current, previous) {

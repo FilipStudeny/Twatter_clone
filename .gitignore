@@ -6,6 +6,8 @@ backend/node_modules
 backend/.pnp
 backend/.pnp.js
 node_modules
+uploads/images
+uploads
 
 # testing
 frontend/coverage
