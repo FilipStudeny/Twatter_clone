@@ -805,3 +805,30 @@ function timeDifference(current, previous) {
         return Math.round(elapsed/msPerYear ) + ' years ago';   
     }
 }
+
+//@ts-ignore
+const getChatName = (chatData) => {
+    let chatName = chatData.chatName;
+
+    if(!chatName){
+        let otherChatUsers = getOtherChatUsers(chatData.users);
+        //@ts-ignore
+        let names = otherChatUsers.map(user=> user.firstName + " " + user.lastName);
+        chatName = names.join(", ");
+    }
+
+    return chatName;
+}
+
+//@ts-ignore
+const getOtherChatUsers = (users) => {
+    if(users.length == 1){
+        return users;
+    }
+
+    //@ts-ignore
+    return users.filter( (user) => {
+        //@ts-ignore
+        return user._id != userLoggedIn._id;
+    })
+}
