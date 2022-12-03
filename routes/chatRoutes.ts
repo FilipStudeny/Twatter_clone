@@ -46,8 +46,10 @@ route.get('/chat', async (req: any, res: Response, next: NextFunction) => {
         }
     })
     .populate('users')
+    .populate('latestMessage')
     .sort({ 'updatedAt': -1 })
-    .then( results => {
+    .then( async results => {
+        results = await USER.populate(results, { path: 'latestMessage.sender'});
         res.status(200).send(results);
     })
     .catch((err) => {
@@ -180,7 +182,15 @@ route.post('/chat/newMessage', async (req: any, res: Response, next: NextFunctio
     }
 
     MESSAGE.create(newMessage)
-    .then(results => {
+    .then(async results => {
+        results = await results.populate(['sender']);
+        results = await results.populate(['chat']);
+
+        CHAT.findByIdAndUpdate(req.body.chatID, { 'latestMessage' : results})
+        .catch((err) => {
+            console.log(err);
+        });
+
         res.status(201).send(results);
     })
     .catch((err) => {
@@ -190,6 +200,21 @@ route.post('/chat/newMessage', async (req: any, res: Response, next: NextFunctio
 
     return
 })
+
+route.get('/chats/:chatID/messages', async (req: any, res: Response, next: NextFunction) => {
+
+    await MESSAGE.find({ 'chat': req.params.chatID })
+    .populate('sender')
+    .then( results => {
+        res.status(200).send(results);
+    })
+    .catch((err) => {
+        console.log(err);
+        return res.sendStatus(400);
+    });
+
+})
+
 
 const getChatByUserID = (usserLoggedInID: any, otherUserID: any) => {
 

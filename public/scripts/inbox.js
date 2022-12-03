@@ -29,7 +29,7 @@ const outputChatList = (chatList, container) => {
 const createChatHTML = (chatData) => {
     let chatName = getChatName(chatData);
     const img = getChatImageElement(chatData);
-    const latestMessage = "Latest message";
+    const latestMessage = getLatestMessage(chatData.latestMessage);
     const html = 
     `
         <a href='/messages/chat/${chatData._id}' class='resultListItem'>
@@ -44,7 +44,15 @@ const createChatHTML = (chatData) => {
     return html;
 }
 
+//@ts-ignore
+const getLatestMessage = (message) => {
+    if(message != null){
+        const sender = message.sender;
+        return `${sender.firstName} ${sender.lastName}: ${message.content}`;
+    }
 
+    return "New chat";
+}
 
 //@ts-ignore
 const getChatImageElement = (chatData) => {
