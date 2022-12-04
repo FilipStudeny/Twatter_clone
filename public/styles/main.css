@@ -699,11 +699,23 @@ button i, button span{
     -webkit-flex-box: 0;
 }
 
+.typingDots img,
 .chatMessages .message .messageBody{
     background-color: #f1f0f0;
     padding: 6px 12px;
     border-radius: 18px;
     font-size: 14px;
+}
+
+.typingDots img{
+    height: 35px;
+
+}
+
+.typingDots{
+    padding: var(--spacing);
+    padding-bottom: 0;
+    display: none;
 }
 
 .chatMessages .message .messageContainer{
@@ -795,3 +807,4 @@ button i, button span{
     width: 50%;
     max-width: 75px;
 }
+

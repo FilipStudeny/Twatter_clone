@@ -1,10 +1,27 @@
+let typing = false;
+//@ts-ignore
+let lastTypingTime;
+
 //@ts-ignore
 $(document).ready(() => {
+
+    //SOCKET IO 
+    //@ts-ignore
+    socket.emit("join room", chatID);
+    socket.on("typing", () => {
+        $('.typingDots').show();
+    })
+
+    socket.on("stop typing", () => {
+        $('.typingDots').hide();
+    })
+
     //@ts-ignore
     $.get(`/messages/chats/${chatID}`, (data) => {
         $("#chatName").text(getChatName(data));
     })
 
+    // *** AJAX *** //
     //@ts-ignore
     $.get(`/messages/chats/${chatID}/messages`, (data) => {
 
@@ -57,11 +74,43 @@ $(".sendMessageButton").click( () => {
 
 $(".inputTextBox").keydown( (event) => {
 
+    updateTyping();
+
     if(event.which === 13 ){
         messageSubmited();
         return false
     }
 });
+
+const updateTyping = () => {
+
+    if(!connected){
+        return;
+    }
+
+    if(!typing){
+        typing = true;
+
+        //@ts-ignore
+        socket.emit("typing", chatID);
+    }
+
+    lastTypingTime = new Date().getTime();
+    let timerLength = 3000;
+
+    setTimeout(() => {
+        const timeNow = new Date().getTime();
+        //@ts-ignore
+        const timeDifferenece = timeNow - lastTypingTime;
+        if(timeDifferenece >= timerLength && typing){
+            //@ts-ignore
+            socket.emit("stop typing", chatID);
+            typing = false;
+        }
+    }, timerLength);
+
+
+};
 
 const messageSubmited = () => {
     //@ts-ignore
@@ -70,6 +119,9 @@ const messageSubmited = () => {
     if(message != ""){
         sendMessage(message);
         $('.inputTextBox').val("");
+        //@ts-ignore
+        socket.emit("stop typing", chatID);
+        typing = false;
     }
 }
 
@@ -85,6 +137,10 @@ const sendMessage = (message) => {
 
         }
         addChatMessage(data);
+
+        if(connected){
+            socket.emit("new message", data);
+        }
     })
 }
 

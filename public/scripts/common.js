@@ -832,3 +832,12 @@ const getOtherChatUsers = (users) => {
         return user._id != userLoggedIn._id;
     })
 }
+
+//@ts-ignore
+const messageReceived = (newMessage) => {
+    if($('.chatContainer').length == 0){
+        //Show popup notification   
+    }else{
+        addChatMessage(newMessage);
+    }
+}

@@ -185,6 +185,7 @@ route.post('/chat/newMessage', async (req: any, res: Response, next: NextFunctio
     .then(async results => {
         results = await results.populate(['sender']);
         results = await results.populate(['chat']);
+        results = await USER.populate(results, { path: 'chat.users'});
 
         CHAT.findByIdAndUpdate(req.body.chatID, { 'latestMessage' : results})
         .catch((err) => {
