@@ -24,12 +24,14 @@ html(lang="en")
                         i.fa-solid.fa-house-user             
                     a(href="/search") 
                         i.fa-solid.fa-magnifying-glass
-                    a(href="/notification") 
-                        i.fa-solid.fa-bell              
+                    a(href="/notifications") 
+                        i.fa-solid.fa-bell        
+                        span#notificationBadge    
                     a(href=`/profile/${userLoggedIn.username}`) 
                         i.fa-solid.fa-user
                     a(href="/messages") 
                         i.fa-solid.fa-message
+                        span#messagesBadge   
                     a(href="/logout") 
                         i.fa-solid.fa-right-from-bracket
 

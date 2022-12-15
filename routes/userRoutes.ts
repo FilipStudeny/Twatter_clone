@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { inserNotification, NOTIFICATION } from '../models/NotificationModel';
 export const route = express.Router();
 
 // *** MULTER CONFIG *** //
@@ -302,6 +303,10 @@ route.put('/users/:userID/follow', requireLogin, async (req: any, res: Response,
         res.sendStatus(400);
     })
 
+    if(!isFollowing){
+        await inserNotification(userID, req.session.user._id, "Follow", req.session.user._id)
+    }
+    
     return res.status(200).send(req.session.user);
 })
 

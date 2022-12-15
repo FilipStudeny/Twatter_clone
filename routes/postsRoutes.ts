@@ -1,6 +1,7 @@
 import express, { NextFunction, Request, Response } from 'express'
 import { post } from 'jquery';
 import { requireLogin } from '../middleware/authentication'
+import { inserNotification } from '../models/NotificationModel';
 import { POST } from '../models/PostModel';
 import { USER } from '../models/UserModel';
 
@@ -127,6 +128,10 @@ route.post('/new', async (req: any, res: Response) => {
         newPost = await USER.populate(newPost, { path: 'postedBy'})
         newPost = await POST.populate(newPost, { path: 'replyTo'})
 
+        if(newPost.replyTo !== undefined){
+            await inserNotification(newPost.replyTo, req.session.user._id, "Reply", newPost.postedBy)
+        }
+
         res.status(201).send(newPost);
     })
     .catch((err) => {
@@ -173,6 +178,10 @@ route.put('/:id/like',  async (req: any, res: Response, next: NextFunction) => {
         res.sendStatus(400);
     })
 
+    if(!isLiked){
+        await inserNotification(post.postedBy, req.session.user._id, "Post like", post._id)
+    }
+
     res.status(200).send(post);
 
 })
@@ -216,7 +225,10 @@ route.post('/:id/retweet',  async (req: any, res: Response, next: NextFunction) 
         res.sendStatus(400);
     })
 
-    console.log(post);
+    if(!deletedPost){
+        await inserNotification(post.postedBy, req.session.user._id, "Retweet", post._id)
+    }
+
     res.status(200).send(post);
 
 })

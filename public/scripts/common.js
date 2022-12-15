@@ -5,6 +5,12 @@ var timer;
 // @ts-ignore
 let selectedUsers = [];
 
+$(document).ready( () => {
+    refreshMessagesBadge();
+    refreshNotificationsBadge();
+});
+
+
 $("#postTextArea, #replyTextArea",).keyup( (event) => {
     const textbox = $(event.target);
     // @ts-ignore
@@ -452,8 +458,22 @@ $("#createChatButton").click( () => {
         }
 
 
-        window.location.href = `/messages/${chat._id}`;
+        window.location.href = `/messages/chat/${chat._id}`;
     });
+
+});
+
+$(document).on("click", ".notification.active", (event) => {
+    const container = $(event.target);
+    const notificationID = container.data().id;
+
+    let href = container.attr("href");
+    event.preventDefault();
+
+    //@ts-ignore
+    const callback = () => window.location = href;
+    //@ts-ignore
+    markNotificationsAsOpened(notificationID, callback);
 
 });
 
@@ -840,4 +860,53 @@ const messageReceived = (newMessage) => {
     }else{
         addChatMessage(newMessage);
     }
+
+    refreshMessagesBadge();
 }
+
+//@ts-ignore
+const markNotificationsAsOpened = (notificationID = null, callback = null) => {
+    if(callback == null){
+        //@ts-ignore
+        callback = () => {
+            location.reload();
+        };
+    }
+
+    const url = notificationID != null ? `/notifications/${notificationID}/markAsOpened` : `/notifications/markAsOpened`;
+
+    $.ajax({
+        url: url,
+        type: "PUT",
+        //@ts-ignore
+        success: () => callback(),
+    })
+}
+
+const refreshMessagesBadge = () => {
+
+    $.get("/messages/chat", {'unreadOnly' : true }, (data) => {
+
+        const numResults = data.length;
+
+        if(numResults > 0) {
+            $("#messagesBadge").text(numResults).addClass("active");
+        }else{
+            $("#messagesBadge").text('').removeClass("active");
+        }
+    });
+}
+
+const refreshNotificationsBadge = () => {
+
+    $.get("/notifications/all", {'unreadOnly' : true }, (data) => {
+        const numResults = data.length;
+
+        if(numResults > 0) {
+            $("#notificationBadge").text(numResults).addClass("active");
+        }else{
+            $("#notificationBadge").text('').removeClass("active");
+        }
+    });
+}
+

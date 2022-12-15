@@ -4,6 +4,7 @@ import { requireLogin} from './middleware/authentication';
 import { route as userRoutes } from './routes/userRoutes';
 import { route as postRoutes } from './routes/postsRoutes';
 import { route as chatRoutes } from './routes/chatRoutes'
+import { route as notificationsRoutes } from './routes/notificationsRoutes';
 
 import path from 'path';
 import bodyParser from "body-parser";
@@ -44,6 +45,7 @@ app.use(express.static(path.join(__dirname, 'public'))) //CSS from public
 app.use('/',  userRoutes)
 app.use('/posts/', requireLogin, postRoutes)
 app.use('/messages/', requireLogin, chatRoutes)
+app.use('/notifications/', requireLogin, notificationsRoutes)
 
 app.get('/', requireLogin, (req: any, res: Response, next: NextFunction) => {
 

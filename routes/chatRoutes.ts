@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import { requireLogin } from '../middleware/authentication'
 import { CHAT } from '../models/ChatModel';
 import { MESSAGE } from '../models/MessageModel';
+import { inserNotification } from '../models/NotificationModel';
 import { POST } from '../models/PostModel';
 import { USER } from '../models/UserModel';
 
@@ -49,6 +50,11 @@ route.get('/chat', async (req: any, res: Response, next: NextFunction) => {
     .populate('latestMessage')
     .sort({ 'updatedAt': -1 })
     .then( async results => {
+
+        if(req.query.unreadOnly !== undefined && req.query.unreadOnly == "true"){
+            results = results.filter( r => !r.latestMessage.readBy.includes(req.session.user._id))
+        };
+
         results = await USER.populate(results, { path: 'latestMessage.sender'});
         res.status(200).send(results);
     })
@@ -187,10 +193,12 @@ route.post('/chat/newMessage', async (req: any, res: Response, next: NextFunctio
         results = await results.populate(['chat']);
         results = await USER.populate(results, { path: 'chat.users'});
 
-        CHAT.findByIdAndUpdate(req.body.chatID, { 'latestMessage' : results})
+        const chat = await CHAT.findByIdAndUpdate(req.body.chatID, { 'latestMessage' : results})
         .catch((err) => {
             console.log(err);
         });
+
+        insertNotifications(chat, newMessage);
 
         res.status(201).send(results);
     })
@@ -237,4 +245,18 @@ const getChatByUserID = (usserLoggedInID: any, otherUserID: any) => {
         upsert: true //If didn't find it create it
     })
     .populate('users');
+}
+
+const insertNotifications = (chat: any, message: any) => {
+
+    chat.users.forEach((userID: any) => {
+
+        if(userID == message.sender._id){
+           return;
+        }
+
+        inserNotification(userID, message.sender._id, "New message", message.chat._id);
+    });
+
+    
 }
