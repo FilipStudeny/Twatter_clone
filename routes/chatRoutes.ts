@@ -52,7 +52,7 @@ route.get('/chat', async (req: any, res: Response, next: NextFunction) => {
     .then( async results => {
 
         if(req.query.unreadOnly !== undefined && req.query.unreadOnly == "true"){
-            results = results.filter( r => !r.latestMessage.readBy.includes(req.session.user._id))
+            results = results.filter( r => r.latestMessage && !r.latestMessage.readBy.includes(req.session.user._id))
         };
 
         results = await USER.populate(results, { path: 'latestMessage.sender'});
@@ -224,6 +224,18 @@ route.get('/chats/:chatID/messages', async (req: any, res: Response, next: NextF
 
 })
 
+route.put('/chats/:chatID/messages/markAsRead', async (req: any, res: Response, next: NextFunction) => {
+
+    await MESSAGE.updateMany({ 'chat': req.params.chatID }, { $addToSet: { 'readBy': req.session.user._id} })
+    .then( () => {
+        res.sendStatus(204);
+    })
+    .catch((err) => {
+        console.log(err);
+        return res.sendStatus(400);
+    });
+
+})
 
 const getChatByUserID = (usserLoggedInID: any, otherUserID: any) => {
 

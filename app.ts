@@ -119,6 +119,10 @@ socketIO.on("connection", (client: Socket) => {
         client.in(room).emit("stop typing") //Anyone in this room will receive notification
     });
 
+    client.on("notification received", (room: any) => { 
+        client.in(room).emit("notification received") //Anyone in this room will receive notification
+    });
+
     client.on("new message", (newMessage: any) => { //RELOAD CHAT WHEN NEW MESSAGE ARRIVES
         const chat = newMessage.chat;
 

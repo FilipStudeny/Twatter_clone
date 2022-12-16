@@ -21,6 +21,22 @@ route.get('/',  (req: any, res: Response, next: NextFunction) => {
     return res.render('notifications', payload)
 })
 
+route.get('/latest',  (req: any, res: Response, next: NextFunction) => {
+
+    NOTIFICATION.findOne({ 'userTo' : req.session.user._id })
+    .populate('userTo')
+    .populate('userFrom')
+    .sort( { 'createdAt': -1})
+    .then( (results) => {
+        res.status(200).send(results);
+    })
+    .catch((err) => {
+        console.log(err);
+        res.status(400).send('Error, something went wrong !')
+    });
+})
+
+
 route.get('/all',  (req: any, res: Response, next: NextFunction) => {
 
     interface Data {
