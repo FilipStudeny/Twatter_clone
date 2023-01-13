@@ -1,0 +1,170 @@
+
+.PageHeader{
+    width: 100%;
+    height: 55px;
+
+    position: fixed;
+    top: 0;
+
+    background-color: var(--blue);
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+
+    justify-content: space-between;
+    align-items: center;
+}
+
+.AppName{
+    color: whitesmoke;
+    font-size: 35px;
+    font-weight: 700;
+
+    padding: 2px 5px 2px 5px;
+    margin-left: 35px;
+    border-radius: 15px;
+}
+
+.AppName:hover{
+    background-color: whitesmoke;
+    color: var(--greyText);
+}
+
+.PageHeader div{
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly
+}
+
+.PageHeader div a{
+
+    width: 40px;
+    height: 40px;
+
+    color: rgb(36, 36, 36);
+    background-color: whitesmoke;
+
+    text-align: center;
+    border-radius: 25px;
+
+    padding: 10px 10px 10px 10px;
+    margin-right: 10px;
+
+    font-weight: 500;
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+
+    transition: width 0.2s;
+}
+
+.PageHeader div a:hover{
+    background-color: var(--blueLight);
+    border-radius: 25px;
+
+    color: whitesmoke;
+
+    width: 110px;
+}
+
+.PageHeader div a p{
+    margin-left: 10px;
+
+    color: rgb(36, 36, 36);
+    font-size: 15px;
+    font-weight: 500;
+
+    opacity: 0;
+    transition: opacity 0.1s;
+
+}
+
+.PageHeader div a:hover p{
+    opacity: 100%;
+    transition: opacity 1s;
+
+}
+
+
+
+
+.UserSideBar{
+    position: fixed;
+    top: 55px;
+    left: 0;
+
+    width: 25%;
+    height: 100%;
+
+    padding: 10px 10px 10px 10px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    background-color: #ffff;
+
+}
+
+.UserImage{
+    width: 180px;
+    height: 180px;
+
+    border-radius: 45px;
+    box-shadow: 0px 0px 4px grey;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.UserImage img{
+    width: 100%;
+    height: 100%;
+}
+
+.UserSideBar h1{
+    margin-top: 10px;
+    font-size: 25px;
+    font-weight: 500;
+}
+
+.UserSideBar .Menu{
+    width: 180px;
+
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+
+    align-items: center;
+    margin-top: 10px;
+    border-top: 1px solid grey;
+}
+
+.UserSideBar .Menu a{
+    width: 100px;
+
+    font-size: 25px;
+    text-align: center;
+
+    padding: 10px 10px 10px 10px;
+    margin-top: 10px;
+    
+    border-radius: 25px;
+
+
+    color: rgb(36, 36, 36);
+    font-weight: 400;
+}
+
+
+.UserSideBar .Menu a:hover{
+    background-color: var(--blue);
+    color: whitesmoke;
+
+}

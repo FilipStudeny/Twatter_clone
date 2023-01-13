@@ -1,0 +1,126 @@
+.Post{
+
+    border: 1px solid grey;
+    border-radius: 15px;
+    padding: 10px 10px 10px 10px;
+    margin: 10px;
+
+    background-color: #ffff;
+    box-shadow: 0px 0px 2px grey;
+
+
+}
+
+.PostHeader{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+
+    margin-bottom: 5px;
+}
+
+.PostHeader img{
+    width: 50px;
+    height: 50px;
+
+    background-color: whitesmoke;
+    border-radius: 50%;
+    box-shadow: 0px 0px 5px grey;
+    padding: 2px;
+}
+
+.PostHeader div{
+    margin-left: 10px;
+    width: 100%;
+}
+
+.PostHeader div h1{
+    color: rgb(36, 36, 36);
+    font-size: 25px;
+}
+
+.PostHeader div h2{
+    color: var(--greyText);
+    font-size: 20px;
+}
+
+.PostContent{
+    padding: 10px 10px 10px 10px;
+}
+
+.PostContent p{
+    font-size: 18px;
+    overflow: hidden;
+}
+
+.PostFooter{
+    width: 100%;
+    height: 40px;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-top: 10px;
+    border-top: 1px solid grey;
+    padding-top: 10px;
+}
+
+.PostUserButtons button{
+    margin-left: 10px;
+    width: 35px;
+    height: 35px;
+
+    font-size: 20px;
+    text-align: center;
+
+    border: none;
+    border-radius: 50%;
+}
+
+.PostUserButtons button:hover{
+    cursor: pointer;
+
+}
+.LikeButton{
+    color: rgb(221, 74, 74);
+}
+
+.LikeButton:hover{
+    background-color: var(--red);
+    color: whitesmoke;
+}
+
+.CommentButton{
+    color: var(--blue);
+}
+
+.CommentButton:hover{
+    background-color: var(--blue);
+    color: whitesmoke;
+
+}
+
+.DeletePostButton{
+    height: 35px;
+    width: 60px;
+    
+    margin-right: 15px;
+
+    border: none;
+    border-radius: 15px;
+
+    font-size: 18px;
+    font-weight: 500;
+    text-align: center;
+
+    color: whitesmoke;
+    background-color: var(--red);
+}
+
+.DeletePostButton:hover{
+    background-color: var(--redBackground);
+    cursor: pointer;
+    color: var(--greyText);
+}
