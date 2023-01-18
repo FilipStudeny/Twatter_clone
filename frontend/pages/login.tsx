@@ -1,10 +1,9 @@
 import Link from 'next/link'
 import React, { ReactElement } from 'react'
-import { PageWithLayout } from '../components/Layouts/LayoutConfig'
-import LoginRegisterLayout from '../components/Layouts/LoginRegisterLayout'
+
 import styles from '../styles/Login.module.css'
 
-const Login: PageWithLayout = () =>{
+const Login = () =>{
 
     const errorMessagesClass = `${styles.disabled}`;
 
@@ -38,14 +37,5 @@ const Login: PageWithLayout = () =>{
         </div>
     )
 }
-
-Login.getLayout = function getLayout(page: ReactElement){
-    return(
-        <LoginRegisterLayout>
-            {page}
-        </LoginRegisterLayout>
-    )
-}
-
 
 export default Login

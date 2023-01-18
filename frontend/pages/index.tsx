@@ -1,13 +1,12 @@
+import UserSideBar from '@/components/UserSideBar';
 import Head from 'next/head'
 import Image from 'next/image'
 import { ReactElement } from 'react';
-import { PageWithLayout } from '../components/Layouts/LayoutConfig';
-import MainLayout from '../components/Layouts/MainLayout';
 import Post from '../components/Post';
 import styles from '../styles/HomePage.module.css'
 
 
-const Home: PageWithLayout = () => {
+const Home = () => {
 
     const changeFormHeight = () => {
         
@@ -83,14 +82,6 @@ const Home: PageWithLayout = () => {
                     
             </div>
         </>
-    )
-}
-
-Home.getLayout = function getLayout(page: ReactElement){
-    return(
-        <MainLayout>
-            {page}
-        </MainLayout>
     )
 }
 

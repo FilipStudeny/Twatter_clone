@@ -1,14 +1,11 @@
-import Image from 'next/image'
-import Link from 'next/link'
+import SearchedPost from '@/components/search/SearchedPost'
+import SearchedUser from '@/components/search/SearchedUser'
+
 import React, { MouseEventHandler, ReactElement, useState } from 'react'
-import { PageWithLayout } from '../components/Layouts/LayoutConfig'
-import MainLayout from '../components/Layouts/MainLayout'
-import SearchedPost from '../components/Search/SearchedPost'
-import SearchedUser from '../components/Search/SearchedUser'
 
 import style from '../styles/Search.module.css'
 
-const Search: PageWithLayout = () => {
+const Search = () => {
 
     const [searchPosts, setPostsSearch] = useState<String>();
 
@@ -54,14 +51,5 @@ const Search: PageWithLayout = () => {
         </>
     )
 }
-
-Search.getLayout = function getLayout(page: ReactElement){
-    return(
-        <MainLayout>
-            {page}
-        </MainLayout>
-    )
-}
-
 
 export default Search

@@ -1,35 +1,55 @@
 import Link from 'next/link'
-import React from 'react'
+import React, { useContext } from 'react'
 import styles from '../styles/PageHeader.module.css'
-import UserSideBar from './UserSideBar'
+import UserSession from './context/userSession'
 
 
 function PageHeader() {
-  return (
-    <>
-        <div className={styles.PageHeader}>
-            <Link href='/' className={styles.AppName}>Twatter</Link>
 
-            <div>
-                <Link href='/login'>
-                    <i className="fa-solid fa-right-to-bracket"></i>
-                    <p>Login</p>
-                </Link>
-                <Link href='/register'>
-                    <i className="fa-solid fa-user-plus"></i>
-                    <p>Sign up</p>
-                </Link>
+    const userSessionData = useContext(UserSession);
 
-                <Link href='/login'>
-                    <i className="fa-solid fa-right-from-bracket"></i>
-                    <p>Loggout</p>
-                </Link>
+    const displayAuthOptions = () => {
+        if(userSessionData.isLoggedIn){
+            return(
+                <>
+                    <Link href='#' onClick={userSessionData.loggout}>
+                        <i className="fa-solid fa-right-from-bracket"></i>
+                        <p>Loggout</p>
+                    </Link>
+                </>
+            )
+        }else{
+            return(
+                <>
+                    <Link href='/#' onClick={userSessionData.login}>
+                        <i className="fa-solid fa-right-to-bracket"></i>
+                        <p>Login</p>
+                    </Link>
+                    <Link href='/#'>
+                        <i className="fa-solid fa-user-plus"></i>
+                        <p>Sign up</p>
+                    </Link>
+                </>
+            )
+        }
+
+    }
+
+    return (
+        <>
+            <div className={styles.PageHeader}>
+                <Link href='/' className={styles.AppName}>Twatter</Link>
+
+                <div>
+                    <>
+                        {displayAuthOptions()}
+                    </>
+                </div>
             </div>
-        </div>
 
 
-    </>
-  )
+        </>
+    )
 }
 
 export default PageHeader
