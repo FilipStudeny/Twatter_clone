@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import React, { useContext } from 'react'
 import styles from '../styles/PageHeader.module.css'
-import UserSession from './context/userSession'
+import UserSession from './context/UserSession'
 
 
 function UserSideBar() {
@@ -36,17 +36,17 @@ function UserSideBar() {
                         <i className="fa-solid fa-magnifying-glass"></i>
                     </Link>
 
-                    <Link href='#'>
+                    <Link href='/messages'>
                         <i className="fa-solid fa-message"></i> 
                     </Link>
-                    <Link href='#'>
+                    <Link href='/profile'>
                         <i className="fa-solid fa-user"></i>
                     </Link>
-                    <Link href='#'>
+                    <Link href='/settings'>
                         <i className="fa-solid fa-gear"></i>
                     </Link>
 
-                    <Link href='#'>
+                    <Link href='#' onClick={userSessionData.loggout}>
                         <i className="fa-solid fa-right-from-bracket"></i>
                     </Link>
                     

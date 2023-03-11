@@ -1,150 +1,54 @@
-import express, { Application, NextFunction, Request, Response} from 'express'
-import * as dotenv from 'dotenv'
-import { requireLogin} from './middleware/authentication';
-import { route as userRoutes } from './routes/userRoutes';
-import { route as postRoutes } from './routes/postsRoutes';
-import { route as chatRoutes } from './routes/chatRoutes'
-import { route as notificationsRoutes } from './routes/notificationsRoutes';
+import express, { Application, Express, NextFunction, Response, Request } from "express";
+import mongoose, { ConnectOptions } from "mongoose";
+import {route as UserController} from "./Controllers/UserController";
+import cors from 'cors'
+import bodyParser from 'body-parser'
 
-import path from 'path';
-import bodyParser from "body-parser";
-import { Database } from './controllers/Database';
-import session from 'express-session';
+const PORT: number = 8888;
+const app: Application = express();
+const dbConnectionURL = "mongodb://localhost:27017/Twatter";
 
-import { Server, Socket } from 'socket.io';
-import { createServer }  from 'http';
+// CORS FIX
 
+app.use((req: Request, res: Response, next: NextFunction) => {
+    
+    //CORS FIX
+    //ADD HEADER TO REQUREESTS
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE');
+    
+    next();
+});
 
-// *** CONFIG *** //
-dotenv.config();
+app.use(bodyParser.json())
 
-const PORT: any = 8888;
-const app = express();
-const url: any = process.env.MONGO_URL;
-const mongoDB = new Database(url);
-const chatServer = createServer(app);
-const socketIO = require('socket.io')(chatServer);
+app.get("/", (req: Request, res: Response, next: NextFunction) => {
+    res.send("hello world")
+});
 
-
-// *** MIDDLEWARE AND STUFF *** //
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(session({ //EXPRESS sessions
-    secret: "beepboop", //hash
-    resave: true, //session forced to save
-    saveUninitialized: false //prevents session from being saved as uninitiblabla
-}))
-
-//app.use(bodyParser.json()); //NEEDS TO RECEIVE DATA IN JSON FORMAT 
-
-app.set('view engine', 'pug')
-app.set('views', 'views')
-app.use(express.static(path.join(__dirname, 'public'))) //CSS from public
+app.use("/api/user/", UserController);
 
 
-// *** ROUTES *** //
-app.use('/',  userRoutes)
-app.use('/posts/', requireLogin, postRoutes)
-app.use('/messages/', requireLogin, chatRoutes)
-app.use('/notifications/', requireLogin, notificationsRoutes)
-
-app.get('/', requireLogin, (req: any, res: Response, next: NextFunction) => {
-
-    const payload: Object = {
-        pageTitle : "Home page",
-        userLoggedIn: req.session.user,
-        userLoggedInJS: JSON.stringify(req.session.user)
-    }
-
-    res.status(200)
-    res.render('home', payload)
-})
-
-app.get('/search', requireLogin, (req: any, res: Response, next: NextFunction) => {
-
-    const payload: Object = {
-        pageTitle : "Search",
-        userLoggedIn: req.session.user,
-        userLoggedInJS: JSON.stringify(req.session.user)
-    }
-
-    res.status(200)
-    res.render('search', payload)
-})
-
-app.get('/search/:selectedTab', requireLogin, (req: any, res: Response, next: NextFunction) => {
-
-    const payload: Object = {
-        pageTitle : "Search",
-        userLoggedIn: req.session.user,
-        userLoggedInJS: JSON.stringify(req.session.user),
-        selectedTab: req.params.selectedTab
-    }
-
-    res.status(200)
-    res.render('search', payload)
-})
 
 //*** 404 ***//
 app.all('*', (req: Request, res: Response, next: NextFunction) => {
 
-    const payload: Object = {
-        pageTitle : "Home page"
-    }
-
-    res.status(404)
-    res.render('404', payload)
+    res.status(404).send("Page not found: Unknown URI");
 })
 
+const options = {
+    useNewUrlParser: true, 
+    useUnifiedTopology: true,
+    family: 4 // Use IPv4, skip trying IPv6
+}
 
-// *** MONGO *** //
-mongoDB.connect();
-
-// *** SOCKET IO *** //
-socketIO.on("connection", (client: Socket) => {
-
-    client.on("setup", (userData: any) => { //"setup" <= user defined name / use is joining chat room
-        client.join(userData._id);
-        client.emit("connected");
-    });
-
-    client.on("join room", (room: any) => { 
-        client.join(room);  //User joins a room
-    });
-
-    client.on("typing", (room: any) => { 
-        client.in(room).emit("typing") //Anyone in this room will receive notification
-    });
-
-    client.on("stop typing", (room: any) => { 
-        client.in(room).emit("stop typing") //Anyone in this room will receive notification
-    });
-
-    client.on("notification received", (room: any) => { 
-        client.in(room).emit("notification received") //Anyone in this room will receive notification
-    });
-
-    client.on("new message", (newMessage: any) => { //RELOAD CHAT WHEN NEW MESSAGE ARRIVES
-        const chat = newMessage.chat;
-
-        if(!chat.users){
-            return console.log("Chat.users not defined");
-        }
-
-        chat.users.forEach((user: any) => {
-
-            if(user._id == newMessage.sender._id){
-                return;
-            }
-
-            client.in(user._id).emit("message received", newMessage); 
-        });
-    });
-    
-})
-
+mongoose.Promise = global.Promise;
+mongoose.connect(dbConnectionURL, options as ConnectOptions)
+        .then(() => {console.log("Connected to MongoDB")})
+        .catch((err) => console.log(err));
 
 //*** BEEP BOOP ***//
-chatServer.listen(PORT, () => {
+app.listen(PORT, () => {
     console.log(`Your server available at http://localhost:${PORT}`);
 })
-

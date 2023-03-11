@@ -1,12 +1,11 @@
-import UserSession from '@/components/context/userSession'
-import UserSessionHook from '@/components/hooks/userSessionHook'
+import UserSession from '@/components/context/UserSession'
+import UserSessionHook from '@/components/hooks/UserSessionHook'
 import PageHeader from '@/components/PageHeader'
 import UserSideBar from '@/components/UserSideBar'
 import '@/styles/globals.css'
 import type { AppProps } from 'next/app'
 import { useRouter } from 'next/router'
 import Script from 'next/script'
-import { useContext } from 'react'
 
 export default function App({ Component, pageProps }: AppProps) {
     const router = useRouter();

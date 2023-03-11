@@ -18,7 +18,6 @@ const Search = () => {
             searchOption = 'USERS';
         }
 
-        console.log(searchOption);
         setPostsSearch(searchOption); 
 
     }

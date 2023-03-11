@@ -1,12 +1,17 @@
+import UserSession from '@/components/context/UserSession';
 import UserSideBar from '@/components/UserSideBar';
 import Head from 'next/head'
 import Image from 'next/image'
-import { ReactElement } from 'react';
+import { useRouter } from 'next/router';
+import { ReactElement, useContext, useEffect } from 'react';
 import Post from '../components/Post';
 import styles from '../styles/HomePage.module.css'
 
 
 const Home = () => {
+
+    const router = useRouter();
+    const userSessionData = useContext(UserSession);
 
     const changeFormHeight = () => {
         
@@ -38,6 +43,13 @@ const Home = () => {
         }
     }
 
+
+    useEffect(() => {
+        if(!userSessionData.isLoggedIn){
+            router.push("/login");
+        }
+        
+    },[router, userSessionData.isLoggedIn])
 
     return (
         <>

@@ -1,0 +1,252 @@
+
+.ProfileHeader{
+    height: 200px;
+    background-color: white;
+
+}
+
+.ProfileBackgroundPicture{
+    width: 100%;
+    height: 150px;
+    background-color: rgb(178, 178, 218);
+}
+
+.BackgroundPictureCoverPhotoButton{
+    width: 100%;
+    height: 100%;
+
+    z-index: 6;
+    background-color: rgba(255, 255, 255, 0);
+    border: none;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.BackgroundPictureCoverPhotoButton i{
+    display: none;
+}
+
+.BackgroundPictureCoverPhotoButton:hover{
+    background-color: rgba(0, 0, 0, 0.781);
+    cursor: pointer;
+}
+
+.BackgroundPictureCoverPhotoButton:hover .CameraCover{
+    color: rgb(190, 190, 190);
+    display: block;
+}
+
+
+.ProfileHeaderData{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ProfilePhotoOptions{
+    position: relative;
+    bottom: 50px;
+    margin-left: 15px;
+}
+
+.ProfilePhotoOptions,.ProfilePictureContainer{
+
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.ProfilePictureCoverPhotoButton{
+    width: 100px;
+    height: 100px;
+    position: absolute;
+
+    background-color: rgba(255, 255, 255, 0);
+    border: none;
+    border-radius: 50%;
+    z-index: 4;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.ProfilePictureCoverPhotoButton i{
+    display: none;
+}
+.CameraCover{
+    position: absolute;
+    text-align: center;
+    z-index: 3;
+
+    font-size: 50px;
+    color: rgba(0, 0, 0, 0.781);
+}
+
+.ProfilePictureCoverPhotoButton:hover{
+    background-color: rgba(0, 0, 0, 0.781);
+    cursor: pointer;
+    box-shadow: 0px 0px 5px grey;
+
+}
+
+.ProfilePictureCoverPhotoButton:hover .CameraCover{
+    color: rgb(190, 190, 190);
+    display: block;
+
+}
+
+.ProfilePicture{
+    position: relative;
+
+    width: 100px;
+    height: 100px;
+
+    border-radius: 50%;
+    background-color: white;
+    box-shadow: 0px 0px 5px grey;
+    z-index: 2;
+
+    padding: 10px 10px;
+}
+
+
+.ProfilePhotoOptions h1{
+    position: relative;
+    right: 20px;
+
+    z-index: 1;
+    width: auto;
+
+    font-size: 25px;
+    font-weight: 400;
+    color: var(--greyText);
+
+    background-color: white;
+    border: none;
+    box-shadow: 0px 0px 5px grey;
+
+    padding: 5px 10px 5px 25px;
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+}
+
+.ProfileOptions{
+    position: relative;
+    bottom: 50px;
+    margin-right: 15px;
+
+    height: 30px;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.ProfileOptions button{
+    width: 90px;
+    height: 40px;
+
+    color: var(--greyText);
+    background-color: white;
+    border: none;
+    border-radius: 15px;
+
+    font-size: 18px;
+    font-weight: 400;
+    text-align: center;
+
+    margin-left: 10px;
+    margin-right: 10px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    box-shadow: 0px 0px 5px grey;
+}
+
+.ProfileOptions button:hover{
+    background-color: var(--blue);
+    color: white;
+    cursor: pointer;
+}
+
+.ProfileBody{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    padding-top: 10px;
+    padding-bottom: 10px;
+
+    background-color: white;
+}
+
+.ProfileBody h1{
+    margin-left: 25px;
+    margin-right: 25px;
+
+    color: var(--greyText);
+    font-weight: 400;
+    font-size: 30px;
+
+}
+
+
+
+.SearchOptions{
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.SearchOptions button{
+    width: 50%;
+    height: 50px;
+
+    border: none;
+
+    font-size: 30px;
+    font-weight: 500;
+    border-top: 1px solid grey;
+    border-bottom: 1px solid grey;
+
+
+}
+
+.SearchOptions button:nth-child(2){
+    border-left: 1px solid grey;
+
+
+}
+
+.SearchOptions button:hover{
+    background-color: var(--blue);
+    color: whitesmoke;
+    cursor: pointer;
+    
+}
+
+.Selected{
+    background-color: var(--blue);
+    color: whitesmoke;
+}
+
+.NotSelected{
+    background-color: #ffff;
+    color: var(--greyText);
+}

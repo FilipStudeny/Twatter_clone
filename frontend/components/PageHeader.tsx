@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import React, { useContext } from 'react'
 import styles from '../styles/PageHeader.module.css'
-import UserSession from './context/userSession'
+import UserSession from './context/UserSession'
 
 
 function PageHeader() {
@@ -25,7 +25,7 @@ function PageHeader() {
                         <i className="fa-solid fa-right-to-bracket"></i>
                         <p>Login</p>
                     </Link>
-                    <Link href='/#'>
+                    <Link href='/register'>
                         <i className="fa-solid fa-user-plus"></i>
                         <p>Sign up</p>
                     </Link>

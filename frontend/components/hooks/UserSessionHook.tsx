@@ -1,3 +1,4 @@
+import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 
 const UserSessionHook = () => {
@@ -5,27 +6,46 @@ const UserSessionHook = () => {
     const [username, setUsername] = useState<any>();
     const [loggedIn, setIsLoggedIn] = useState<any>();
 
-    const login = useCallback(() => {
-        setUsername('Admin');
-        setIsLoggedIn(true);
+    const router = useRouter();
+
+    const login =  useCallback(() => {
+
+
+        const name = "Admin";
+        const loggedIn = true;
+
+
+
+        localStorage.setItem('userData', JSON.stringify({
+            username: name,
+            loggedIn: loggedIn
+        }));
+
+        
+        setUsername(name);
+        setIsLoggedIn(loggedIn);
 
     }, [])
 
 
     const loggout = useCallback(() => {
-        setUsername('');
-        setIsLoggedIn(false);
 
-    }, [])
 
-    useEffect(() => {
-        const storedData = JSON.parse(localStorage.getItem('userData') || '{}');
+        const name = "";
+        const loggedIn = false;
 
-        if(storedData){
-            console.log(storedData);
-        }
 
-    },[login])
+        localStorage.removeItem('userData');
+
+
+        
+        setUsername(name);
+        setIsLoggedIn(loggedIn);
+
+        router.push("/login");
+
+
+    }, [router])
 
     return{ username, loggedIn, login, loggout }
 }
