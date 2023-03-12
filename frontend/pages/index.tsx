@@ -43,14 +43,6 @@ const Home = () => {
         }
     }
 
-
-    useEffect(() => {
-        if(!userSessionData.isLoggedIn){
-            router.push("/login");
-        }
-        
-    },[router, userSessionData.isLoggedIn])
-
     return (
         <>
             <Head>

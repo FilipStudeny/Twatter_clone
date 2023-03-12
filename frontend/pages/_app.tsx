@@ -30,7 +30,7 @@ export default function App({ Component, pageProps }: AppProps) {
     const { username, loggedIn, login, loggout } = UserSessionHook();
 
     return( 
-        <UserSession.Provider value={{username: username, isLoggedIn: loggedIn, login: login, loggout: loggout}}>
+        <UserSession.Provider value={{username, isLoggedIn: loggedIn, login, loggout}}>
             <Script src="https://kit.fontawesome.com/a2c399c19b.js"></Script>
 
             <PageHeader/>

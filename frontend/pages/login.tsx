@@ -1,6 +1,7 @@
+import UserSession from '@/components/context/UserSession';
 import Link from 'next/link'
 import { useRouter } from 'next/router';
-import React, { ReactElement, useState } from 'react'
+import React, { ReactElement, useContext, useState } from 'react'
 
 import styles from '../styles/Login.module.css'
 
@@ -13,16 +14,20 @@ interface ResponseData {
     error?: string;
     message?: string;
 }
+
+
   
 enum InputType {
     USERNAME = 'username',
     PASSWORD = 'password',
 }
   
+
 const Login = () =>{
 
 
     const router = useRouter();
+    const userSession = useContext(UserSession)
 
     const [username, setUsername] = useState<string>()
     const [password, setPassword] = useState<string>()
@@ -68,15 +73,15 @@ const Login = () =>{
             setShowErrorMessage(true);
         }
         
-        const data: ResponseData = await response.json();
-        console.log(data)
+        const data: any = await response.json();
+        console.log(data);
         if (response.ok) {
             if(data.error){
                 setErrorMessage(data.error);
                 setShowErrorMessage(true);
                 return;
             }else{
-                
+                userSession.login(data)
             }
         } else {
             setErrorMessage('There was an error submitting the form');

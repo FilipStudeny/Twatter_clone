@@ -1,6 +1,6 @@
 import express, { NextFunction, Request, Response } from "express";
 import bcrypt from 'bcrypt';
-import { USER } from "../Models/User";
+import User, { UserModel } from "../Models/User";
 import jwt, { Jwt } from "jsonwebtoken";
 
 export const route = express.Router();
@@ -9,8 +9,8 @@ export const route = express.Router();
 route.post("/login", async (req:Request, res: Response, next: NextFunction) => {
 
     interface RequestData{
-        username: string,
-        password: string
+        "username": string,
+        "password": string
     }
     
     // *** USER DATA *** //
@@ -19,13 +19,12 @@ route.post("/login", async (req:Request, res: Response, next: NextFunction) => {
         "password": req.body.password
     }
 
-    console.log(userLoginData)
 
     if(!(userLoginData.username && userLoginData.password)){
-        return res.status(200).send({ error: "ERROR: Login credentials are empty !" });
+        return res.status(400).send({ error: "Bad Request: User data not sent, try again !" });
     }
 
-    const user = await USER.findOne({
+    const response: any = await UserModel.findOne({
         $or: [ //FIND USER BY STUFF FROM ARRAY 
             { username: userLoginData.username },
             { email: userLoginData.username }
@@ -33,45 +32,48 @@ route.post("/login", async (req:Request, res: Response, next: NextFunction) => {
     })
     .catch((err: any) => {
         console.log(err);
-        return res.status(200).send({ error: "ERROR: Something went wrong, try again !" });
+        return res.status(500).send({ error: "Internal Server Error: Something went wrong, try again !" });
     })
+    const user: User = response;
 
     if(!user){
-        return res.status(200).send({ error: "ERROR: User not found !" });
+        return res.status(401).send({ error: "ERROR: User not found !" }); // Unauthorized
     }
 
-    console.log(user)
     const passwordMatch = await bcrypt.compare(userLoginData.password, user.password);
     if(!passwordMatch){
-        return res.status(200).send({ error: "ERROR: Something went wrong, try again !" });
+        return res.status(401).send({ error: "Invalid username or password !" }); // Unauthorized
     }
 
     // JWT TOKEN
     const token: string = await jwt.sign({
         "user_id": user.id,
         "username": user.username,
-        "first_name": user.firstname,
-        "last_name": user.lastName,
-        "profile_picture": user.profilePicture
     }, "supersecretkey")
   
-    return res.status(200).send({"token": token})
-
+    return res.status(200).send({
+        "token": token, 
+        "user_id": user.id,
+        "username": user.username,
+        "first_name": user.firstName,
+        "last_name": user.lastName,
+        "profile_picture": user.profilePicture
+    })
 })
 
 route.post("/register", async (req: Request, res: Response, next: NextFunction) => {
 
     interface RegisterData{
-        username: string,
-        firstName: string,
-        lastName: string,
-        email: string,
-        password: string
+        "username": string,
+        "firstName": string,
+        "lastName": string,
+        "email": string,
+        "password": string
     }
 
     const newUserData: RegisterData = req.body;
     if(newUserData == null || Object.keys(newUserData).length == 0){
-        return res.status(503).send({ error: "ERROR: User data not sent, try again !" });
+        return res.status(400).send({ error: "Bad Request: User data not sent, try again !" });
     }
 
     const firstName = newUserData.firstName;
@@ -81,30 +83,32 @@ route.post("/register", async (req: Request, res: Response, next: NextFunction) 
     const password = newUserData.password;
 
     if(firstName == null || lastName == null || username == null || email == null || password == null ){
-        return res.status(200).send({ error: "ERROR: User data not complete, try again !" });
+        return res.status(400).send({ error: "Bad Request: User data not complete, try again !" });
     }
 
-    const foundUser = await USER.findOne({
+    const response: any = await UserModel.findOne({
         $or: [
             { 'username': username },
             { 'email' : email }
         ]
     }).catch((err: any) => {
         console.log(err);
-        return res.status(200).send({ error: "ERROR: Something went wrong, try again !" });
+        return res.status(500).send({ error: "Internal Server Error: Something went wrong, try again !" });
     })
+    const foundUser: User = response;
+
 
     if (foundUser){
         if(email == foundUser.email){
-            return res.status(200).send({ error: "ERROR: Email already in use !" });
+            return res.status(409).send({ error: "Conflict: Email already in use !" });
         }else{
-            return res.status(200).send({ error: "ERROR: Username already in use !" });
+            return res.status(409).send({ error: "Conflict: Username already in use !" });
         }
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = new USER({
+    const newUser = new UserModel({
         firstName: firstName,
         lastName: lastName,
         username: username,
@@ -114,9 +118,9 @@ route.post("/register", async (req: Request, res: Response, next: NextFunction) 
 
     try {
         await newUser.save();
-        return res.status(200).send({ message: "New user created !" });
+        return res.status(201).send({ message: "Created: New user created !" });
     } catch (err) {
         console.log(err);
-        return res.status(200).send({ error: "ERROR: Something went wrong, try again !" });
+        return res.status(500).send({ error: "Internal Server Error: Something went wrong, try again !" });
     }
 });
