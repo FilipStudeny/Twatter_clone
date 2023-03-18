@@ -2,12 +2,12 @@ import Image from 'next/image'
 import Link from 'next/link'
 import React, { useContext } from 'react'
 import styles from '../styles/PageHeader.module.css'
-import UserSession from './context/UserSession'
+import { UserSessionContext } from '@/components/context/UserSession'
 
 
 function UserSideBar() {
 
-    const userSessionData = useContext(UserSession);
+    const userSessionData = useContext(UserSessionContext);
 
     const displayUserName = () => {
         if(userSessionData.isLoggedIn){
@@ -46,7 +46,7 @@ function UserSideBar() {
                         <i className="fa-solid fa-gear"></i>
                     </Link>
 
-                    <Link href='#' onClick={userSessionData.loggout}>
+                    <Link href='#' onClick={userSessionData.logout}>
                         <i className="fa-solid fa-right-from-bracket"></i>
                     </Link>
                     

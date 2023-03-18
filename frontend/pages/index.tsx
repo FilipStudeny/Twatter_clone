@@ -1,46 +1,57 @@
-import UserSession from '@/components/context/UserSession';
-import UserSideBar from '@/components/UserSideBar';
 import Head from 'next/head'
 import Image from 'next/image'
-import { useRouter } from 'next/router';
-import { ReactElement, useContext, useEffect } from 'react';
+import { useState } from 'react';
 import Post from '../components/Post';
 import styles from '../styles/HomePage.module.css'
 
-
 const Home = () => {
 
-    const router = useRouter();
-    const userSessionData = useContext(UserSession);
-
+    const [newPostBody, setNewPostBody] = useState<any>();
+    
     const changeFormHeight = () => {
-        
-        let textArea = (document.getElementById("newPostForm") as HTMLInputElement);
-        let textAreaContainer = (document.getElementById("textAreaContainer") as HTMLElement)
-        let newPostContainer = (document.getElementById("NewPostContainer") as HTMLElement)
-        
-        let numberOfRows = textArea?.value.split("\n").length;
 
-        if(!textArea || !textAreaContainer || !newPostContainer){
-            alert("New post container not found")
-            return;
-        }
+        let textArea = (document.getElementById("NewPostForm") as HTMLTextAreaElement);
+        const numOfRows = textArea.value.split('\n').length;        
 
-        if(textArea?.value == ""){
-            numberOfRows = 0;
-        }
-
-        if(numberOfRows >= 3){
-            newPostContainer.style.height = "220px";
-            textAreaContainer.style.height = "150px";
-            textArea.style.height = "150px";
-        }
-
-        if(numberOfRows < 3){
-            newPostContainer.style.height = "150px";
-            textAreaContainer.style.height = "80px";
+        if(textArea.value == ""){
             textArea.style.height = "80px";
         }
+
+        switch (true) {
+            case (numOfRows >= 7):
+                textArea.style.height = "200px";
+                break;
+            case (numOfRows >= 3):
+                textArea.style.height = "150px";
+                break;
+            default:
+                textArea.style.height = "80px";
+                break;
+        }
+
+        setNewPostBody(textArea.value)
+          
+    }
+
+
+    const onSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
+        event.preventDefault();
+
+        const payload = { 
+            'token': localStorage.getItem('token'),
+            'post_content': encodeURIComponent(newPostBody)
+        }
+        
+        const body = JSON.stringify(payload);
+        let response: any;
+
+        try {
+            // Make API call to post data
+          } catch (error) {
+            // Handle error appropriately
+            console.error(error);
+          }
+
     }
 
     return (
@@ -52,19 +63,21 @@ const Home = () => {
                 <link rel="icon" href="/favicon.ico" />
             </Head>
 
-            <div className={styles.NewPostContainer} id="NewPostContainer">
-                <div className={styles.NewPostFormContainer} id="textAreaContainer">
-                    <Image src='/images/user_icon.png' width="512" height="512" alt='User profile image'/>
-                    <textarea id='newPostForm' onChange={changeFormHeight}/>
-                </div>
-                <div className={styles.NewPostToolbar}>
-                    <p></p>
-                    <button>Post</button>
+            <div className={styles.NewPostContainer}>
+                <Image src='/images/user_icon.png' width="512" height="512" alt='User profile image'/>
+                <form className={styles.Form} onSubmit={onSubmit}>
+                    <textarea id='NewPostForm' onChange={changeFormHeight}/>
+                    <div className={styles.FormToolBar}>
+                        <div>
+                            <button>Image</button>
+                        </div>
 
-                </div>
-
+                        <button>Post</button>
+                    </div>
+                </form>
             </div>
-            <div className='ContentContainer'>
+
+            <div>
                   
                 <Post/>
 

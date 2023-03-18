@@ -3,9 +3,7 @@ import React from 'react'
 
 import styles from '../styles/404.module.css'
 
-const Login = () =>{
-
-
+const PageNotFound = () =>{
     return (
         <div className={styles.NotFound}>
             <h1>Page not found !</h1>
@@ -14,4 +12,4 @@ const Login = () =>{
     )
 }
 
-export default Login
+export default PageNotFound

@@ -1,18 +1,18 @@
 import Link from 'next/link'
 import React, { useContext } from 'react'
 import styles from '../styles/PageHeader.module.css'
-import UserSession from './context/UserSession'
+import { UserSessionContext } from '@/components/context/UserSession'
 
 
 function PageHeader() {
 
-    const userSessionData = useContext(UserSession);
+    const userSessionData = useContext(UserSessionContext);
 
     const displayAuthOptions = () => {
         if(userSessionData.isLoggedIn){
             return(
                 <>
-                    <Link href='#' onClick={userSessionData.loggout}>
+                    <Link href='/login' onClick={userSessionData.logout}>
                         <i className="fa-solid fa-right-from-bracket"></i>
                         <p>Loggout</p>
                     </Link>
@@ -21,7 +21,7 @@ function PageHeader() {
         }else{
             return(
                 <>
-                    <Link href='/#' onClick={userSessionData.login}>
+                    <Link href='/login'>
                         <i className="fa-solid fa-right-to-bracket"></i>
                         <p>Login</p>
                     </Link>

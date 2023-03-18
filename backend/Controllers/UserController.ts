@@ -49,12 +49,11 @@ route.post("/login", async (req:Request, res: Response, next: NextFunction) => {
     const token: string = await jwt.sign({
         "user_id": user.id,
         "username": user.username,
+        "email": user.email
     }, "supersecretkey")
   
     return res.status(200).send({
-        "token": token, 
-        "user_id": user.id,
-        "username": user.username,
+        "token": token,
         "first_name": user.firstName,
         "last_name": user.lastName,
         "profile_picture": user.profilePicture

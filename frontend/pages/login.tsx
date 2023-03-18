@@ -1,7 +1,7 @@
-import UserSession from '@/components/context/UserSession';
 import Link from 'next/link'
 import { useRouter } from 'next/router';
 import React, { ReactElement, useContext, useState } from 'react'
+import { UserSessionContext } from '@/components/context/UserSession'
 
 import styles from '../styles/Login.module.css'
 
@@ -9,13 +9,6 @@ interface Payload {
     username: string | undefined;
     password: string | undefined;
 }
-  
-interface ResponseData {
-    error?: string;
-    message?: string;
-}
-
-
   
 enum InputType {
     USERNAME = 'username',
@@ -27,7 +20,7 @@ const Login = () =>{
 
 
     const router = useRouter();
-    const userSession = useContext(UserSession)
+    const userSession = useContext(UserSessionContext)
 
     const [username, setUsername] = useState<string>()
     const [password, setPassword] = useState<string>()

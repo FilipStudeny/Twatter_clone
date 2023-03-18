@@ -1,59 +1,49 @@
 .NewPostContainer{
-
     width: 100%;
-    height: 160px;
 
-    border-bottom: 1px solid grey;
-    padding-bottom: 10px;
-    padding-top: 10px;
-
-    background-color: #ffff;
-
-}
-
-.NewPostFormContainer{
-    width: 100%;
-    height: 80px;
+    padding: 10px 10px;
+    background-color: white;
 
     display: flex;
     flex-direction: row;
-    flex-wrap: nowrap;
-
     justify-content: space-between;
+    align-items: center;
 
-    padding: 10px 10px 10px 10px;
+    border-bottom: 1px solid grey;
 }
 
-.NewPostFormContainer img{
-    padding: 2px 2px 2px 2px;
-    width: 50px;
-    height: 50px;
+.NewPostContainer>img{
+    height: 70px;
+    width: 70px;
+
+    margin-left: 30px;
 
     border-radius: 50%;
-    background-color: whitesmoke;
-    box-shadow: 0px 0px 4px grey;
+    box-shadow: 0px 0px 5px grey;
 
+    padding: 5px 5px;
 }
-.NewPostFormContainer textarea{
-    margin-left: 10px;
-    padding: 10px;
+
+.Form{
+    width: 80%;
+    height: auto;
+}
+
+.Form>textarea{
     width: 100%;
-
     height: 80px;
-    resize: none;
 
-    border: none;
-    outline: none;
+    padding: 5px 5px;
+
+    resize: none;
     border-radius: 10px;
+    border: none;
 
     background-color: whitesmoke;
-    box-shadow: 0px 0px 4px grey;
-
 }
 
-
-.NewPostToolbar{
-    height: 60px;
+.FormToolBar{
+    height: 50px;
     margin-top: 10px;
 
     display: flex;
@@ -62,7 +52,7 @@
     align-items: center;
 }
 
-.NewPostToolbar button{
+.FormToolBar>button, .FormToolBar>div>button{
     height: 35px;
     width: 60px;
     
@@ -77,11 +67,10 @@
 
     color: whitesmoke;
     background-color: var(--blue);
+
 }
 
-.NewPostToolbar button:hover{
+.FormToolBar button:hover, .FormToolBar>div>button:hover{
     background-color: var(--blueLight);
     cursor: pointer;
 }
-
-

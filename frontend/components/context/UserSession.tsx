@@ -1,27 +1,70 @@
-import { createContext } from 'react'
+import { createContext, useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 
 interface LoginData {
-    "token": string, 
-    "user_id": string,
-    "username": string,
-    "first_name": string,
-    "last_name": string,
-    "profile_picture": string
+  token: string; 
+  user_id: string;
+  username: string;
+  first_name: string;
+  last_name: string;
+  profile_picture: string;
 }
 
-const UserSession = createContext({
+interface IUserSessionContext {
+  isLoggedIn: boolean;
+  username: string;
+  login: (data: LoginData) => void;
+  logout: () => void;
+}
 
-    'isLoggedIn': false,
-    'username': "",
+const UserSessionContext = createContext<IUserSessionContext>({
+  isLoggedIn: false,
+  username: '',
+  login: () => {},
+  logout: () => {}
+});
 
-    'login': (data: LoginData) => {
-
-    },
-
-    'loggout': () => {
-
+const UserSessionProvider = () => {
+    const [username, setUsername] = useState<string>("");
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+    const router = useRouter();
+  
+    useEffect(() => {
+      const token = localStorage.getItem('token');
+      const userData = localStorage.getItem('userData');
+    
+      if (token && userData) {
+        const parsedData: LoginData = JSON.parse(userData);
+        setUsername(parsedData.username);
+        setIsLoggedIn(true);
+      } 
+    
+    }, []);
+  
+    const login = (data: LoginData) => {
+      const userData: LoginData = data;
+  
+      setUsername(userData.username);
+      setIsLoggedIn(true)
+  
+      localStorage.setItem('token', userData.token);
+      localStorage.setItem('userData', JSON.stringify(userData));
+  
+      router.push("/");
+    };
+  
+    const logout = () => {
+      const name = "";
+      const loggedIn = false;
+    
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    
+      setUsername(name);
+      setIsLoggedIn(loggedIn);
     }
+  
+    return { username, isLoggedIn, login, logout}
+};
 
-})
-
-export default UserSession
+export { UserSessionProvider, UserSessionContext };
