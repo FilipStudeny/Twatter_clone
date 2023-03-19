@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import Image from 'next/image'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Post from '../components/Post';
 import styles from '../styles/HomePage.module.css'
 
@@ -37,23 +37,73 @@ const Home = () => {
     const onSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
         event.preventDefault();
 
-        const payload = { 
-            'token': localStorage.getItem('token'),
-            'post_content': encodeURIComponent(newPostBody)
+        if(newPostBody != "" && newPostBody != undefined){
+            createNewPost()
         }
-        
-        const body = JSON.stringify(payload);
-        let response: any;
 
-        try {
-            // Make API call to post data
-          } catch (error) {
-            // Handle error appropriately
-            console.error(error);
-          }
 
     }
 
+    const createNewPost = async () => {
+        const payload = { 
+            'token': localStorage.getItem('token'),
+            'post_body': encodeURIComponent(newPostBody)
+        }
+        
+        const body = JSON.stringify(payload);
+        try {
+            const response = await fetch("http://localhost:8888/api/post/new", {
+                method: "POST",
+                headers: {
+                "Content-Type": "application/json",
+                "Authorization": 'Bearer ' + payload.token
+                },
+                body: body,
+            })
+            const newPost: PostData = await response.json();
+            setPosts([newPost, ...posts]); // add the new post to the beginning of the posts array
+            (document.getElementById("NewPostForm") as HTMLTextAreaElement).value = "";
+            setNewPostBody("");
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    
+
+    interface PostData {
+        'id': string,
+        'post_content': string,
+        'post_creator': {
+          'id': string,
+          'username': string
+        },
+        'likes': [],
+        'replies': [],
+        'createdAt': string,
+    }
+
+    const [posts, setPosts] = useState<any>([]);
+    useEffect(() => {
+
+        const fetchPosts = async () => {
+            const payload = { 
+                'token': localStorage.getItem('token'),
+            }
+
+            const response = await fetch('http://localhost:8888/api/post/allPosts', {
+                method: "GET",
+                headers: {
+                    "Authorization": 'Bearer ' + payload.token
+                },
+            })
+            const data: PostData = await response.json();
+            setPosts(data);
+        }
+
+        fetchPosts();
+    }, []);
+    
     return (
         <>
             <Head>
@@ -76,27 +126,19 @@ const Home = () => {
                     </div>
                 </form>
             </div>
-
-            <div>
-                  
-                <Post/>
-
-                <Post/>
-                <Post/>
-                <Post/>
-                <Post/>
-                <Post/>
-                <Post/>
-                <Post/>
-                <Post/>
-                <Post/>
-                <Post/>
-                <Post/>
-                <Post/>
-                <Post/>
-                <Post/>
                     
-                    
+            <div id='PostsContainer'>
+                {posts.map((post: PostData, index: string) => (
+                        <Post 
+                            key={index}
+                            post_id={post.id}
+                            post_creator={post.post_creator} 
+                            post_body={post.post_content} 
+                            likes={post.likes}
+                            replies={post.replies}
+                            post_creation_time={post.createdAt}
+                        />
+                    ))}
             </div>
         </>
     )

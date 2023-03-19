@@ -6,7 +6,6 @@ interface Reply extends Document {
 }
 
 interface Post extends Document {
-    post_title: string;
     post_content: string;
     post_creator: mongoose.Schema.Types.ObjectId;
     likes: mongoose.Schema.Types.ObjectId[];
@@ -20,7 +19,6 @@ const replySchema = new Schema<Reply>({
 
 const postSchema = new Schema<Post>(
     {
-        post_title: { type: String, trim: true },
         post_content: { type: String, trim: true },
         post_creator: { type: Schema.Types.ObjectId, ref: "User" },
         likes: [{ type: Schema.Types.ObjectId, ref: "User" }],
@@ -28,4 +26,5 @@ const postSchema = new Schema<Post>(
     },{ timestamps: true }
 );
 
+export default Post;
 export const PostModel = mongoose.model<Post>("Post", postSchema);

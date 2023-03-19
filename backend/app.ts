@@ -1,6 +1,9 @@
 import express, { Application, Express, NextFunction, Response, Request } from "express";
 import mongoose, { ConnectOptions } from "mongoose";
-import {route as UserController} from "./Controllers/UserController";
+import { route as UserController } from "./Controllers/UserController";
+import { route as PostController} from "./Controllers/PostController";
+
+
 import cors from 'cors'
 import bodyParser from 'body-parser'
 
@@ -9,18 +12,26 @@ const app: Application = express();
 const dbConnectionURL = "mongodb://localhost:27017/Twatter";
 
 // CORS FIX
+app.use(cors({
+    origin: 'http://localhost:3000',
+    allowedHeaders: 'Authorization, Content-Type',
+    methods: 'GET, POST, DELETE'
 
+}));
+
+  
+/*
 app.use((req: Request, res: Response, next: NextFunction) => {
     
     //CORS FIX
     //ADD HEADER TO REQUREESTS
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000/');
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE');
     
     next();
 });
-
+*/
 app.use(bodyParser.json())
 
 app.get("/", (req: Request, res: Response, next: NextFunction) => {
@@ -28,6 +39,7 @@ app.get("/", (req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use("/api/user/", UserController);
+app.use("/api/post/", PostController);
 
 
 
