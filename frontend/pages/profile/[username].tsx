@@ -1,14 +1,15 @@
-import UserSession from '@/components/context/UserSession';
+
+import { UserSessionContext } from '@/components/context/UserSession';
 import SearchedPost from '@/components/search/SearchedPost';
 import SearchedUser from '@/components/search/SearchedUser';
 import Image from 'next/image'
 import React, { useContext, useState } from 'react'
-import style from '../styles/Profile.module.css'
+import style from '../../styles/Profile.module.css'
 
 const Profile = () => {
 
     const [searchOption, setPostsSearch] = useState<String>(); 
-    const userSessionData = useContext(UserSession);
+    const userSessionData = useContext(UserSessionContext);
 
     const setSearchOption = (searchFor: String) => {
 

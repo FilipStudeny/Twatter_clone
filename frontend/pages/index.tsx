@@ -3,11 +3,26 @@ import Image from 'next/image'
 import { useEffect, useState } from 'react';
 import Post from '../components/Post';
 import styles from '../styles/HomePage.module.css'
+import styles2 from '../styles/404.module.css'
+
+interface PostData {
+    '_id': string,
+    'post_content': string,
+    'post_creator': {
+      'id': string,
+      'username': string
+    },
+    'likes': [],
+    'replies': [],
+    'createdAt': string,
+}
 
 const Home = () => {
 
     const [newPostBody, setNewPostBody] = useState<any>();
-    
+    const [posts, setPosts] = useState<any>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
     const changeFormHeight = () => {
 
         let textArea = (document.getElementById("NewPostForm") as HTMLTextAreaElement);
@@ -30,9 +45,7 @@ const Home = () => {
         }
 
         setNewPostBody(textArea.value)
-          
     }
-
 
     const onSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
         event.preventDefault();
@@ -40,8 +53,6 @@ const Home = () => {
         if(newPostBody != "" && newPostBody != undefined){
             createNewPost()
         }
-
-
     }
 
     const createNewPost = async () => {
@@ -62,31 +73,21 @@ const Home = () => {
             })
             const newPost: PostData = await response.json();
             setPosts([newPost, ...posts]); // add the new post to the beginning of the posts array
-            (document.getElementById("NewPostForm") as HTMLTextAreaElement).value = "";
+            let textArea = (document.getElementById("NewPostForm") as HTMLTextAreaElement);
+            textArea.value = "";
+            textArea.style.height = "80px";
+
             setNewPostBody("");
 
         } catch (error) {
             console.log(error);
         }
     }
-    
 
-    interface PostData {
-        'id': string,
-        'post_content': string,
-        'post_creator': {
-          'id': string,
-          'username': string
-        },
-        'likes': [],
-        'replies': [],
-        'createdAt': string,
-    }
-
-    const [posts, setPosts] = useState<any>([]);
     useEffect(() => {
 
         const fetchPosts = async () => {
+            setIsLoading(true);
             const payload = { 
                 'token': localStorage.getItem('token'),
             }
@@ -97,13 +98,17 @@ const Home = () => {
                     "Authorization": 'Bearer ' + payload.token
                 },
             })
+
+            
             const data: PostData = await response.json();
+            setIsLoading(false);
             setPosts(data);
         }
 
         fetchPosts();
+        
     }, []);
-    
+  
     return (
         <>
             <Head>
@@ -128,17 +133,25 @@ const Home = () => {
             </div>
                     
             <div id='PostsContainer'>
-                {posts.map((post: PostData, index: string) => (
-                        <Post 
-                            key={index}
-                            post_id={post.id}
-                            post_creator={post.post_creator} 
-                            post_body={post.post_content} 
-                            likes={post.likes}
-                            replies={post.replies}
-                            post_creation_time={post.createdAt}
-                        />
-                    ))}
+                {
+                    isLoading &&
+                    <>
+                        <div className={styles2.NotFound}>
+                            <h1>Loading posts...</h1>
+                        </div>                    
+                    </>
+                }
+                { !isLoading && posts.map((post: PostData, index: string) => (
+                    <Post 
+                        key={index}
+                        post_id={post._id}
+                        post_creator={post.post_creator} 
+                        post_body={post.post_content} 
+                        likes={post.likes}
+                        replies={post.replies}
+                        post_creation_time={post.createdAt}
+                    />
+                ))}
             </div>
         </>
     )

@@ -9,24 +9,17 @@ function UserSideBar() {
 
     const userSessionData = useContext(UserSessionContext);
 
-    const displayUserName = () => {
-        if(userSessionData.isLoggedIn){
-            return(
-                <h1>{userSessionData.username}</h1>
-            )
-        }
-    }
-
     return (
         <>
             <div className={styles.UserSideBar}>
                 <div className={styles.UserImage}>
                     <Image src='/images/user_icon.png' width="512" height="512" alt='User profile image'/>
+                    
                 </div>
-
-                <>
-                    {displayUserName()}
-                </>
+                {
+                    userSessionData.isLoggedIn &&
+                    <Link href={`/profile/user/${userSessionData.username}`} className={styles.Username}>{userSessionData.username}</Link>
+                }
 
                 <div className={styles.Menu}>
                     <Link href='/'>
@@ -39,7 +32,7 @@ function UserSideBar() {
                     <Link href='/messages'>
                         <i className="fa-solid fa-message"></i> 
                     </Link>
-                    <Link href='/profile'>
+                    <Link href={`/profile/${userSessionData.username}`}>
                         <i className="fa-solid fa-user"></i>
                     </Link>
                     <Link href='/settings'>

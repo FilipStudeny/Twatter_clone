@@ -54,6 +54,7 @@ route.post("/login", async (req:Request, res: Response, next: NextFunction) => {
   
     return res.status(200).send({
         "token": token,
+        'username': user.username,
         "first_name": user.firstName,
         "last_name": user.lastName,
         "profile_picture": user.profilePicture

@@ -18,7 +18,7 @@ export const route = express.Router();
 // *** ROUTES *** //
 route.use(authorization);
 
-route.get("/allPosts", async (req:Request, res: Response, next: NextFunction) => {
+route.get("/allPosts", async (req: Request, res: Response, next: NextFunction) => {
     try {
         const posts = await PostModel.find()
             .populate({ 
@@ -30,13 +30,12 @@ route.get("/allPosts", async (req:Request, res: Response, next: NextFunction) =>
             });
 
         res.status(200).send(posts);
-        console.log(posts);
     } catch (err) {
         console.log(err);
         res.status(500).send({ error: "Internal Server Error" });
     }
 })
-
+  
 
 route.get("/post/:id", async (req:Request, res: Response, next: NextFunction) => {
 
@@ -58,7 +57,7 @@ route.post("/new", async (req: Request, res: Response, next: NextFunction) => {
   
     const postData: RequestData = {
         token: req.decodedToken,
-        post_body: decodeURIComponent(req.body.post_body),
+        post_body: req.body.post_body,
     };
   
     if (!postData || !(postData.token && postData.post_body)) {
