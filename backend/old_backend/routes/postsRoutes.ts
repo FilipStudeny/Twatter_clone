@@ -1,5 +1,4 @@
 import express, { NextFunction, Request, Response } from 'express'
-import { post } from 'jquery';
 import { requireLogin } from '../middleware/authentication'
 import { inserNotification } from '../models/NotificationModel';
 import { POST } from '../models/PostModel';

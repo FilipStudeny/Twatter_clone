@@ -9,8 +9,11 @@
     justify-content: space-between;
     align-items: center;
     
-    border-top: 1px solid grey;
     border-bottom: 1px solid grey;
+}
+
+.BorderTop{
+    border-top: 1px solid grey;
 }
 
 .NewPostContainer>img{
@@ -51,6 +54,10 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+}
+
+.Flex_reverse{
+    flex-direction: row-reverse;
 }
 
 .FormToolBar>button, .FormToolBar>div>button{

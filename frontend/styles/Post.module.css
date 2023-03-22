@@ -6,8 +6,6 @@
 
     background-color: #ffff;
     box-shadow: 0px 0px 5px grey;
-
-
 }
 
 .PostHeader{
@@ -98,6 +96,7 @@
 
     .PostUserButtons>button{
         margin-left: 10px;
+        padding: 5px;
         width: 35px;
         height: 35px;
     

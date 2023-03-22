@@ -37,8 +37,6 @@ const UserSessionProvider = () => {
         const parsedData: LoginData = JSON.parse(userData);
         setUsername(parsedData.username);
         setIsLoggedIn(true);
-
-        console.log(parsedData)
       } 
     
     }, []);

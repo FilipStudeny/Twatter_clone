@@ -1,21 +1,11 @@
 import Head from 'next/head'
 import Image from 'next/image'
 import { useEffect, useState } from 'react';
-import Post from '../components/Post';
+import Post, { PostDataProps as PostData} from '../components/Post';
 import styles from '../styles/HomePage.module.css'
 import styles2 from '../styles/404.module.css'
 
-interface PostData {
-    '_id': string,
-    'post_content': string,
-    'post_creator': {
-      'id': string,
-      'username': string
-    },
-    'likes': [],
-    'replies': [],
-    'createdAt': string,
-}
+
 
 const Home = () => {
 
@@ -144,12 +134,13 @@ const Home = () => {
                 { !isLoading && posts.map((post: PostData, index: string) => (
                     <Post 
                         key={index}
-                        post_id={post._id}
+                        _id={post._id}
                         post_creator={post.post_creator} 
-                        post_body={post.post_content} 
+                        post_content={post.post_content} 
                         likes={post.likes}
                         replies={post.replies}
-                        post_creation_time={post.createdAt}
+                        createdAt={post.createdAt}
+                        type='POST'
                     />
                 ))}
             </div>

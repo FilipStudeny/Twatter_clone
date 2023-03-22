@@ -3,20 +3,21 @@ import Image from 'next/image'
 import styles from '../styles/Post.module.css'
 import Link from 'next/link'
 
-interface PostDataProps{
-    'key': string
+export interface PostDataProps{
     'post_creator': {
         'username': string,
-        'id': string
+        '_id': string
     },
-    'post_id': string,
-    'post_body': string,
-    'post_creation_time': string,
+    '_id': string,
+    'post_content': string,
+    'createdAt': string,
     'likes': [],
-    'replies': []
+    'replies': [],
+    'type': string
 }
 
-const Post = ({post_creator, post_body, post_id, post_creation_time, likes, replies} : PostDataProps) => {
+
+const Post = ({post_creator, post_content, _id, createdAt, likes, replies, type} : PostDataProps) => {
 
     function timeDifference(current: any, previous: any): string {
         const intervals = {
@@ -38,11 +39,11 @@ const Post = ({post_creator, post_body, post_id, post_creation_time, likes, repl
     }
     
 
-    let timestamp = timeDifference(new Date(), new Date(post_creation_time));
-    console.log(post_id)
+    let timestamp = timeDifference(new Date(), new Date(createdAt));
+
     return (
         
-        <div key={post_id} className={styles.Post} id={post_id}>
+        <div key={_id} className={styles.Post} id={_id}>
             <Link href={`/profile/${post_creator.username}`} className={styles.PostHeader}>
                 <Image className={styles.PostUserImage} src='/images/user_icon.png' width="512" height="512" alt='User profile image'/>
                 <div>
@@ -51,9 +52,18 @@ const Post = ({post_creator, post_body, post_id, post_creation_time, likes, repl
                 </div>
             </Link>
             <div className={styles.PostBody}>
-                <Link href={`/post/${post_id}`} className={styles.PostLink}>
-                    {post_body}
-                </Link>
+                {
+                    type == 'POST' &&
+                    <Link href={`/post/${_id}`} className={styles.PostLink}>
+                        {post_content}
+                    </Link>
+                }
+                {
+                    type == 'DETAIL' &&
+                    <p className={styles.PostLink}>
+                        {post_content}
+                    </p>
+                }
             </div>
             
             <div className={styles.PostFooter}>
