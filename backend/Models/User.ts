@@ -1,14 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
 
-interface Comment extends Document {
-    commentID: mongoose.Schema.Types.ObjectId;
-    postID: mongoose.Schema.Types.ObjectId;
-}
-
-const commentSchema = new Schema<Comment>({
-    commentID: { type: Schema.Types.ObjectId, ref: "Post" },
-    postID: { type: Schema.Types.ObjectId, ref: "Post" },
-});
 
 interface User extends Document {
     'username': string,
@@ -30,7 +21,7 @@ const userSchema = new Schema<User>({
     'profilePicture': { type: String, default: "/images/user.png" },
     'password': { type: String, required: true },
     'posts': [{ type: Schema.Types.ObjectId, ref: 'Post'}],
-    'comments': [commentSchema]
+    'comments': [{ type: Schema.Types.ObjectId, ref: 'Comment'}]
 
 },{ timestamps: true });
 

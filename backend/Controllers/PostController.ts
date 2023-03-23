@@ -4,6 +4,7 @@ import jwt, { Jwt } from "jsonwebtoken";
 import { authorization } from "../Middleware/authorization";
 import Post, { PostModel } from "../Models/Post";
 import User, { UserModel } from "../Models/User";
+import { CommentModel } from "../Models/Comment";
 
 declare global {
     namespace Express {
@@ -124,23 +125,43 @@ route.post("/:id/newComment", async (req: Request, res: Response, next: NextFunc
         postID: string
     }
 
+    interface Comment{
+        comment: string,
+        creator: string
+    }
+
     const requestData: RequestData = {
         token: req.decodedToken,
         comment: req.body.newComment,
         postID: req.params.id
     };
 
-    interface Comment{
-        comment: string,
-        creator: string,
-    }
-
-    let newComment: Comment = {
+    const comment: Comment = {
         comment: requestData.comment,
         creator: requestData.token.user_id
     }
 
+
     try {
+
+        const newComment = await CommentModel.create({
+            comment: comment.comment,
+            creator: comment.creator,
+        });
+    
+        // Update the user's posts array with the new Post ID
+       await UserModel.findByIdAndUpdate(
+            requestData.token.user_id,
+            { $push: { comments: newComment._id } },
+            { new: true }
+        );
+        
+        await PostModel.findByIdAndUpdate(
+            requestData.postID,
+            { $push: { comments: newComment._id } },
+            { new: true }
+        );
+        /*
         // Update the user's posts array with the new Post ID
         const updatedPost = await PostModel.findByIdAndUpdate(
             requestData.postID,
@@ -163,8 +184,10 @@ route.post("/:id/newComment", async (req: Request, res: Response, next: NextFunc
             { $push: { comments: userCommentData } },
             { new: true }
         );
+        */
 
-        return res.status(200).json(newestComment)
+        return res.status(200).json(newComment)
+        
     } catch (error) {
         console.log(error);
         return res.status(400).send({ error: "Bad Request: Comment can't be created!" });

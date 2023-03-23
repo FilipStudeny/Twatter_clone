@@ -1,0 +1,140 @@
+.Comment{
+    
+    border-radius: 15px;
+    margin: 10px;
+
+    height: 150px;
+
+    background-color: #ffff;
+    box-shadow: 0px 0px 5px grey;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.CommentLeftBody{
+
+    width: 15%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    border-right: 1px solid grey;
+    border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
+
+    padding: 10px;
+    cursor: pointer;
+}
+
+    .CommentLeftBody:hover{
+        background-color: var(--blue)
+    }
+
+        .CommentLeftBody:hover .UserName {
+            color: white;
+        }
+        
+        .CommentLeftBody:hover .TimeStamp {
+            color: white;
+        }
+    
+    .UserImage{
+        width: 60px;
+        height: 60px;
+
+        background-color: whitesmoke;
+        border-radius: 50%;
+        box-shadow: 0px 0px 5px grey;
+        padding: 2px;
+    }
+
+    .CommentLeftBody>div{
+        margin-top: 10px;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .UserName{
+        font-weight: 300;
+        color: rgb(36, 36, 36);
+        font-size: 25px;
+    }
+
+    .TimeStamp{
+        color: var(--greyText);
+        font-size: 20px;
+    }
+
+.CommentBody{
+    flex: 1;
+    height: 100%;
+
+    padding: 10px;
+
+    color: var(--textColor);
+    font-size: 18px;
+    text-align: justify;
+
+    overflow-y: auto;
+}
+
+.CommentToolbar{
+
+    height: 100%;
+    width: 10%;
+
+    display: flex;
+    flex-direction: column;
+
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+    border-left: 1px solid grey;
+}
+
+    .LikeButton{
+        color: rgb(221, 74, 74);
+    }
+
+    .LikeButton:hover{
+        background-color: var(--red);
+        color: whitesmoke; 
+    }
+
+    .DeleteButton{
+        color: var(--blue);
+    }
+
+    .DeleteButton:hover{
+        background-color: var(--blue);
+        color: whitesmoke;
+    }
+
+    .LikeButton, .DeleteButton{
+        width: 100%;
+        height: 50%;
+        background-color: whitesmoke;
+
+        border: none;
+        border-top-right-radius: 15px;
+        border-bottom-right-radius: 15px;
+
+        cursor: pointer;
+    }
+
+    .LikeButton i, .DeleteButton i{
+        font-size: 30px;
+    }
+
+    .fullHeight{
+        height: 100%;
+    }
+

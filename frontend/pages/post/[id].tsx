@@ -5,6 +5,7 @@ import styles from '../../styles/Post.module.css';
 import formStyle from '../../styles/HomePage.module.css';
 import { useRouter } from 'next/router';
 import Post from '@/components/Post';
+import { Comment } from '@/components/Comment';
 
 
 
@@ -96,10 +97,15 @@ const PostDetail = () => {
         }
     }
 
+    const fetchComments = async() => {
+
+    }
+
 
    
     const fetchPostData = async () => {
         const postID = router.query.id;
+
         setIsLoading(true);
 
         const payload = { 
@@ -149,34 +155,7 @@ const PostDetail = () => {
                 </form>
             </div>
 
-            <div className={styles.Post}>
-            <Link href={`/profile/#`} className={styles.PostHeader}>
-                <Image className={styles.PostUserImage} src='/images/user_icon.png' width="512" height="512" alt='User profile image'/>
-                <div>
-                    <h2>admin</h2>
-                    <h3>10:10:2020</h3>
-                </div>
-            </Link>
-            <div className={styles.PostBody}>
-                <p>
-                    comment
-                </p>
-               
-            </div>
-            
-            <div className={styles.PostFooter}>
-                <div className={styles.PostUserButtons}>
-                    <button className={styles.LikeButton}>
-                        <i className="fa-solid fa-heart">10</i>
-                    </button>
-                    <button className={styles.CommentButton}>
-                        <i className="fa-solid fa-comment">10</i>
-                    </button>
-                </div>
-                <button className={styles.DeletePostButton}>Delete</button>
-            </div>
-
-        </div>
+            <Comment/>
 
             
         </>
