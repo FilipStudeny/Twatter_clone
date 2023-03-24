@@ -6,6 +6,21 @@ import jwt, { Jwt } from "jsonwebtoken";
 export const route = express.Router();
 
 // *** ROUTES *** //
+
+route.get("/users", async (req:Request, res: Response, next: NextFunction) => {
+    try {
+        const users = await UserModel.find({}, "_id username profilePicture")
+            .sort({
+                "createdAt":-1 //Descending order
+            });
+
+        res.status(200).json(users);
+    } catch (err) {
+        console.log(err);
+        res.status(500).send({ error: "Internal Server Error" });
+    }
+})
+
 route.post("/login", async (req:Request, res: Response, next: NextFunction) => {
 
     interface RequestData{
@@ -54,6 +69,7 @@ route.post("/login", async (req:Request, res: Response, next: NextFunction) => {
   
     return res.status(200).send({
         "token": token,
+        "user_id": user._id,
         'username': user.username,
         "first_name": user.firstName,
         "last_name": user.lastName,

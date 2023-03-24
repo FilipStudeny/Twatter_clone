@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import styles from '../../styles/Post.module.css';
@@ -8,7 +8,16 @@ import Post from '@/components/Post';
 import { Comment } from '@/components/Comment';
 
 
-
+interface CommentData{
+    '_id': string,
+    'creator': {
+        'username': string,
+        '_id': string
+    },
+    'comment': string,
+    'isOwner': boolean,
+    'createdAt': string,
+}
 
 interface PostData {
     'post_creator': {
@@ -18,22 +27,25 @@ interface PostData {
     '_id': string,
     'post_content': string,
     'createdAt': string,
+    'comments': {
+        '_id': string,
+        'username': string
+    }
     'likes': [],
     'replies': []
 }
 
-interface CommentData {
-    comment: string,
-    creator: string,
-    _id: string
-}
 const PostDetail = () => {
     const [newComment, setNewComment] = useState<any>();
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [postData, setPostData] = useState<PostData>();
     const [comments, setComments] = useState<any>([]);
-    const router = useRouter();
 
+    const userData: any = localStorage.getItem('userData');
+    const parsedData = JSON.parse(userData)
+    const userID = parsedData.user_id
+
+    const router = useRouter();
     const changeFormHeight = () => {
 
         let textArea = (document.getElementById("NewPostForm") as HTMLTextAreaElement);
@@ -57,6 +69,7 @@ const PostDetail = () => {
 
         setNewComment(textArea.value)
     }
+    
 
     const onSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
         event.preventDefault();
@@ -81,31 +94,28 @@ const PostDetail = () => {
                 },
                 body: body,
             })
-
-            const newComment: CommentData = await response.json();
-            //setPosts([newPost, ...posts]); // add the new post to the beginning of the posts array
-            setComments([newComment, ...comments]);
-
+    
+            const newCommentData: CommentData = await response.json();
+    
+            // set the isOwner value based on the current user's ID
+            const userData: any = localStorage.getItem('userData');
+            const parsedData = JSON.parse(userData);
+            const userID = parsedData.user_id;
+            newCommentData.isOwner = userID === newCommentData.creator._id;
+    
+            setComments([newCommentData, ...comments]);
+    
             let textArea = (document.getElementById("NewPostForm") as HTMLTextAreaElement);
             textArea.value = "";
             textArea.style.height = "80px";
-
-            setNewComment("");
-
+    
+            setNewComment("");    
         } catch (error) {
             console.log(error);
         }
     }
-
-    const fetchComments = async() => {
-
-    }
-
-
-   
-    const fetchPostData = async () => {
-        const postID = router.query.id;
-
+    
+    const fetchPostData = async (postID: any) => {
         setIsLoading(true);
 
         const payload = { 
@@ -119,16 +129,44 @@ const PostDetail = () => {
             }
         })
 
+
         const data: PostData = await response.json();
         setIsLoading(false);
         setPostData(data);
+        setComments(data.comments)
+
     }
 
+    const getPostID = useCallback(() => {
+        return router.query.id
+    }, [router.query.id])
+    
+    
     useEffect(() => {
+        const postID = getPostID();
+    
+        if (postID) {
+            fetchPostData(postID);
+        }
+    }, [getPostID]);
 
-        fetchPostData();
-        
-    }, []);
+    const renderComment = (index:string, _id:string, creator:any, comment:string, createdAt:string, postID:any) => {
+
+        const isOwner = userID === creator._id
+        return(
+            <>
+            <Comment
+                    key={index}
+                    _id={_id}
+                    creator={creator}
+                    comment={comment}
+                    isOwner={isOwner}
+                    createdAt={createdAt}
+                    postID={postID}
+                />
+            </>
+        )
+    }
 
     return (
         <>
@@ -146,16 +184,19 @@ const PostDetail = () => {
             )}
 
             <div className={`${formStyle.NewPostContainer} ${formStyle.BorderTop}`}>
-                <Image src='/images/user_icon.png' width="512" height="512" alt='User profile image'/>
+                <h2 className={formStyle.NewFormTitle}>Create new comment: </h2>
                 <form className={formStyle.Form} onSubmit={onSubmit}>
                     <textarea id='NewPostForm' onChange={changeFormHeight}/>
                     <div className={`${formStyle.FormToolBar} ${formStyle.Flex_reverse}`}>
-                        <button>Post</button>
+                        <button className={formStyle.PostButton}>Post new comment</button>
                     </div>
                 </form>
             </div>
 
-            <Comment/>
+            { !isLoading && comments.map((comment: CommentData, index: string) => (
+                renderComment(index, comment._id, comment.creator, comment.comment, comment.createdAt, postData?._id)
+                
+            ))}
 
             
         </>

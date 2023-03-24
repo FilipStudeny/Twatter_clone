@@ -52,6 +52,13 @@ route.get("/post/:id", async (req:Request, res: Response, next: NextFunction) =>
             path: "post_creator", 
             select: "username _id" 
             })
+        .populate({
+            path: "comments",
+            populate: {
+                path: "creator",
+                select: "username _id"
+            }
+        })
         .sort({
             "createdAt":-1 //Descending order
         });
@@ -63,8 +70,6 @@ route.get("/post/:id", async (req:Request, res: Response, next: NextFunction) =>
         return res.status(400).send({ error: "Bad Request: Post can't be loaded!" });
     }
 })
-
-
 
 route.post("/new", async (req: Request, res: Response, next: NextFunction) => {
 
@@ -113,6 +118,8 @@ route.post("/new", async (req: Request, res: Response, next: NextFunction) => {
     }
 });
   
+
+
 route.post("/:id/newComment", async (req: Request, res: Response, next: NextFunction) => {
     interface RequestData {
         token: {
@@ -141,50 +148,12 @@ route.post("/:id/newComment", async (req: Request, res: Response, next: NextFunc
         creator: requestData.token.user_id
     }
 
-
     try {
 
-        const newComment = await CommentModel.create({
-            comment: comment.comment,
-            creator: comment.creator,
-        });
-    
-        // Update the user's posts array with the new Post ID
-       await UserModel.findByIdAndUpdate(
-            requestData.token.user_id,
-            { $push: { comments: newComment._id } },
-            { new: true }
-        );
-        
-        await PostModel.findByIdAndUpdate(
-            requestData.postID,
-            { $push: { comments: newComment._id } },
-            { new: true }
-        );
-        /*
-        // Update the user's posts array with the new Post ID
-        const updatedPost = await PostModel.findByIdAndUpdate(
-            requestData.postID,
-            { $push: { comments: newComment } },
-            { new: true }
-        ).sort({
-            "createdAt":-1 //Descending order
-        });;
-
-        //GET NEWEST COMMENT
-        const newestComment: any = updatedPost?.comments.pop();
-        const userCommentData = {
-            postID: requestData.postID,
-            commentID: newestComment?._id
-        }
-
-        //UPDATE USER COMMENT WITH COMMENT ID AND POST ID
-        await UserModel.findByIdAndUpdate(
-            requestData.token.user_id,
-            { $push: { comments: userCommentData } },
-            { new: true }
-        );
-        */
+        const newComment = await CommentModel.create(comment);
+        await UserModel.findByIdAndUpdate(requestData.token.user_id, { $push: { comments: newComment._id } });
+        await PostModel.findByIdAndUpdate(requestData.postID, { $push: { comments: newComment._id } });
+        await newComment.populate("creator", "username _id");
 
         return res.status(200).json(newComment)
         
@@ -193,4 +162,51 @@ route.post("/:id/newComment", async (req: Request, res: Response, next: NextFunc
         return res.status(400).send({ error: "Bad Request: Comment can't be created!" });
     }
     
+});
+
+
+
+route.delete("/:id/comment/:comment_id", async (req: Request, res: Response, next: NextFunction) => {
+
+    const postID = req.params.id;
+    const commentID = req.params.comment_id;
+
+    try {
+        // Find the comment to delete
+        const comment: any = await CommentModel.findById(commentID);
+
+        if (!comment) {
+            return res.status(404).json({ message: "Comment not found" });
+        }
+
+        // Remove comment from User model
+        const user = await UserModel.findByIdAndUpdate(
+            comment.creator,
+            { $pull: { comments: commentID } },
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Remove comment from Post model
+        const post = await PostModel.findByIdAndUpdate(
+            postID,
+            { $pull: { comments: commentID } },
+            { new: true }
+        );
+
+        if (!post) {
+            return res.status(404).json({ message: "Post not found" });
+        }
+
+        // Remove the comment from the Comment model
+        await CommentModel.findByIdAndDelete(commentID);
+        return res.status(200).json({ message: "Comment deleted successfully" });
+    }catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Server error" });
+    }
+
 });

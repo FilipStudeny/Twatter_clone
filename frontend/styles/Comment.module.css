@@ -3,7 +3,7 @@
     border-radius: 15px;
     margin: 10px;
 
-    height: 150px;
+    height: 90px;
 
     background-color: #ffff;
     box-shadow: 0px 0px 5px grey;
@@ -15,8 +15,7 @@
 }
 
 .CommentLeftBody{
-
-    width: 15%;
+    width: 10%;
     height: 100%;
 
     display: flex;
@@ -28,7 +27,9 @@
     border-top-left-radius: 15px;
     border-bottom-left-radius: 15px;
 
-    padding: 10px;
+    padding-left: 10px;
+    padding-right: 5px;
+
     cursor: pointer;
 }
 
@@ -45,8 +46,8 @@
         }
     
     .UserImage{
-        width: 60px;
-        height: 60px;
+        width: 50px;
+        height: 50px;
 
         background-color: whitesmoke;
         border-radius: 50%;
@@ -55,7 +56,6 @@
     }
 
     .CommentLeftBody>div{
-        margin-top: 10px;
 
         display: flex;
         flex-direction: column;
@@ -64,15 +64,13 @@
     }
 
     .UserName{
+        margin-top: 5px;
         font-weight: 300;
         color: rgb(36, 36, 36);
-        font-size: 25px;
+        font-size: 18px;
     }
 
-    .TimeStamp{
-        color: var(--greyText);
-        font-size: 20px;
-    }
+
 
 .CommentBody{
     flex: 1;
@@ -80,12 +78,26 @@
 
     padding: 10px;
 
-    color: var(--textColor);
-    font-size: 18px;
-    text-align: justify;
 
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     overflow-y: auto;
 }
+
+    .CommentBody>p{
+        color: var(--textColor);
+        font-size: 20px;
+        text-align: justify;
+    }
+
+    .TimeStamp{
+        color: var(--greyText);
+        font-size: 15px;
+
+        width: 100%;
+        text-align: right;
+    }
 
 .CommentToolbar{
 

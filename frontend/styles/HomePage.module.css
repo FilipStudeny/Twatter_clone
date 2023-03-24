@@ -5,7 +5,7 @@
     background-color: white;
 
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: space-between;
     align-items: center;
     
@@ -14,6 +14,13 @@
 
 .BorderTop{
     border-top: 1px solid grey;
+}
+
+.NewFormTitle{
+    width: 100%;
+    color: var(--greyText);
+    font-weight: 400;
+    margin-bottom: 5px;
 }
 
 .NewPostContainer>img{
@@ -29,7 +36,7 @@
 }
 
 .Form{
-    width: 80%;
+    width: 100%;
     height: auto;
 }
 
@@ -43,7 +50,7 @@
     border-radius: 10px;
     border: none;
 
-    background-color: whitesmoke;
+    background-color: rgb(236, 236, 236);
 }
 
 .FormToolBar{
@@ -60,14 +67,15 @@
     flex-direction: row-reverse;
 }
 
-.FormToolBar>button, .FormToolBar>div>button{
-    height: 35px;
-    width: 60px;
+.PostButton, .FormToolBar>div>button{
+    height: auto;
+    width: auto;
     
     margin-right: 15px;
+    padding: 5px;
 
     border: none;
-    border-radius: 15px;
+    border-radius: 10px;
 
     font-size: 18px;
     font-weight: 500;
@@ -78,7 +86,7 @@
 
 }
 
-.FormToolBar button:hover, .FormToolBar>div>button:hover{
+.PostButton:hover, .FormToolBar>div>button:hover{
     background-color: var(--blueLight);
     cursor: pointer;
 }

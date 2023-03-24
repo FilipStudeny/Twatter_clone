@@ -8,7 +8,8 @@ export interface Comment extends Document {
 export const commentSchema = new Schema<Comment>({
     comment: { type: String, trim: true },
     creator: { type: Schema.Types.ObjectId, ref: "User" },
-});
+    
+},{ timestamps: true });
 
 export default Comment;
 export const CommentModel = mongoose.model<Comment>("Comment", commentSchema);

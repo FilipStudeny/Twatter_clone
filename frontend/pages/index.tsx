@@ -109,7 +109,7 @@ const Home = () => {
             </Head>
 
             <div className={styles.NewPostContainer}>
-                <Image src='/images/user_icon.png' width="512" height="512" alt='User profile image'/>
+                <h2 className={styles.NewFormTitle}>Create new post: </h2>
                 <form className={styles.Form} onSubmit={onSubmit}>
                     <textarea id='NewPostForm' onChange={changeFormHeight}/>
                     <div className={styles.FormToolBar}>
@@ -117,7 +117,7 @@ const Home = () => {
                             <button>Image</button>
                         </div>
 
-                        <button>Post</button>
+                        <button className={styles.PostButton}>Create new post</button>
                     </div>
                 </form>
             </div>

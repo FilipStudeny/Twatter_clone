@@ -1,13 +1,22 @@
 import SearchedPost from '@/components/search/SearchedPost'
 import SearchedUser from '@/components/search/SearchedUser'
+import styles2 from '../styles/404.module.css';
 
 import React, { MouseEventHandler, ReactElement, useState } from 'react'
 
 import style from '../styles/Search.module.css'
 
+interface UserData{
+    '_id': string,
+    'username': string,
+    'profile_pic': string
+}
+
 const Search = () => {
 
-    const [searchPosts, setPostsSearch] = useState<String>();
+    const [searchedData, setSearchedData] = useState<String>();
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [data, setData] = useState<any>();
 
     const setSearchOption = (searchFor: String) => {
 
@@ -18,8 +27,28 @@ const Search = () => {
             searchOption = 'USERS';
         }
 
-        setPostsSearch(searchOption); 
+        setSearchedData(searchOption); 
+    }
 
+    const fetchUsers = async() => {
+        setIsLoading(true);
+
+       
+
+        const payload = { 
+            'token': localStorage.getItem('token'),
+        }
+
+        const response = await fetch('http://localhost:8888/api/user/users', {
+            method: "GET",
+            headers: {
+                "Authorization": 'Bearer ' + payload.token
+            },
+        })
+        const data: UserData = await response.json();
+        setData(data)
+
+        setIsLoading(false);
     }
 
 
@@ -32,18 +61,30 @@ const Search = () => {
 
                 </div>
                 <div className={style.SearchOptions}>
-                    <button className={searchPosts === 'USERS' ? style.Selected : style.NotSelected} id='usersOption' onClick={() => setSearchOption('USERS')}>Users</button>
-                    <button className={searchPosts === 'POSTS' ? style.Selected : style.NotSelected}  id='postsOption' onClick={() => setSearchOption('POSTS')}>Posts</button>
+                    <button className={searchedData === 'USERS' ? style.Selected : style.NotSelected} id='usersOption' onClick={() => {setSearchOption('USERS'), fetchUsers()}}>Users</button>
+                    <button className={searchedData === 'POSTS' ? style.Selected : style.NotSelected}  id='postsOption' onClick={() => setSearchOption('POSTS')}>Posts</button>
                 </div>
 
             </div>
             <div className="ContentContainer">
-
-                {searchPosts === 'USERS' &&
-                    <SearchedUser creator="niky"/>
+                {
+                    isLoading &&
+                    <>
+                        <div className={styles2.NotFound}>
+                            <h1>Loading posts...</h1>
+                        </div>                    
+                    </>
                 }
+                { !isLoading && searchedData === 'USERS' && data.map((user: UserData, index: string) => (
+                    <SearchedUser 
+                        key={index}
+                        _id={user._id}
+                        username={user.username}
+                        profile_pic={user.profile_pic}
+                    />
+                ))}
 
-                {searchPosts === 'POSTS' &&
+                { !isLoading && searchedData === 'POSTS' &&
                     <SearchedPost creator="User1" postTitle="Post1"/>
                 }
             </div>
