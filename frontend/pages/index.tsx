@@ -1,9 +1,10 @@
 import Head from 'next/head'
-import Image from 'next/image'
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import Post, { PostDataProps as PostData} from '../components/Post';
 import styles from '../styles/HomePage.module.css'
 import styles2 from '../styles/404.module.css'
+import { UserSessionContext } from '@/components/context/UserSession';
+import { urlencoded } from 'express';
 
 
 
@@ -12,6 +13,7 @@ const Home = () => {
     const [newPostBody, setNewPostBody] = useState<any>();
     const [posts, setPosts] = useState<any>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const userSessionData = useContext(UserSessionContext);
 
     const changeFormHeight = () => {
 
@@ -63,6 +65,7 @@ const Home = () => {
             })
             const newPost: PostData = await response.json();
             setPosts([newPost, ...posts]); // add the new post to the beginning of the posts array
+            
             let textArea = (document.getElementById("NewPostForm") as HTMLTextAreaElement);
             textArea.value = "";
             textArea.style.height = "80px";
@@ -141,6 +144,7 @@ const Home = () => {
                         replies={post.replies}
                         createdAt={post.createdAt}
                         type='POST'
+                        isOwner={userSessionData.user_id === post.post_creator._id}
                     />
                 ))}
             </div>

@@ -71,6 +71,44 @@ route.get("/post/:id", async (req:Request, res: Response, next: NextFunction) =>
     }
 })
 
+route.delete("/:id/delete", async (req:Request, res: Response, next: NextFunction) => {
+
+    const postID: string = req.params.id;
+
+    if(!postID || postID == undefined || postID == ""){
+        return res.status(400).send({ error: "Bad Request: Post ID not sent, try again!" });
+    }
+
+    try {
+        // Find the post to delete
+        const post: any = await PostModel.findById(postID).populate('comments');
+        if (!post) {
+          return res.status(404).json({ message: 'Post not found' });
+        }
+
+        // Delete all associated comments
+        await Promise.all(post.comments.map(async (comment:any) => {
+
+            // Remove the comment from the User's comments array
+            await UserModel.findByIdAndUpdate(comment.creator, { $pull: { comments: comment._id }});
+            // Delete the comment
+            await CommentModel.findByIdAndDelete(comment._id);
+        }));
+
+        // Remove the Post ID from the User's posts array
+        await UserModel.findByIdAndUpdate(post.post_creator._id, { $pull: { posts: post._id } });
+
+        // Delete the post
+        await post.delete();
+        return res.sendStatus(200);
+
+    }catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Server error" });
+    }
+
+})
+
 route.post("/new", async (req: Request, res: Response, next: NextFunction) => {
 
     interface RequestData {

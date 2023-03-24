@@ -57,13 +57,11 @@ export const Comment = ({ _id, creator, comment, isOwner, createdAt, postID } : 
         })
 
         router.reload()
-        
-
     }
     
 
     return (
-        <div key={_id} className={styles.Comment}>
+        <div className={styles.Comment}>
             <Link href={`/profile/${creator._id}`} className={styles.CommentLeftBody}>
                 <Image className={styles.UserImage}  src='/images/user_icon.png' width="512" height="512" alt='User profile image'/>
                 <div>

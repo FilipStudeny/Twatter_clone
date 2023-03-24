@@ -2,6 +2,7 @@ import React from 'react'
 import Image from 'next/image'
 import styles from '../styles/Post.module.css'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 
 export interface PostDataProps{
     'post_creator': {
@@ -13,11 +14,14 @@ export interface PostDataProps{
     'createdAt': string,
     'likes': [],
     'replies': [],
-    'type': string
+    'type': string,
+    'isOwner'?: boolean
 }
 
 
-const Post = ({post_creator, post_content, _id, createdAt, likes, replies, type} : PostDataProps) => {
+const Post = ({post_creator, post_content, _id, createdAt, likes, replies, type, isOwner=false} : PostDataProps) => {
+
+    const router = useRouter();
 
     function timeDifference(current: any, previous: any): string {
         const intervals = {
@@ -37,7 +41,26 @@ const Post = ({post_creator, post_content, _id, createdAt, likes, replies, type}
         }
         return "Just now";
     }
+
+    const deletePost = async() => {
+        
+        const payload = { 
+            'token': localStorage.getItem('token'),
+        }
     
+        await fetch(`http://localhost:8888/api/post/${_id}/delete`, {
+            method: "DELETE",
+            headers: {
+                "Authorization": 'Bearer ' + payload.token
+            }
+        })
+
+        if(router.pathname === "/"){
+            router.reload()
+        }else{
+            router.push("/")
+        }
+    }
 
     let timestamp = timeDifference(new Date(), new Date(createdAt));
 
@@ -54,14 +77,14 @@ const Post = ({post_creator, post_content, _id, createdAt, likes, replies, type}
             <div className={styles.PostBody}>
                 {
                     type == 'POST' &&
-                    <Link href={`/post/${_id}`} className={styles.PostLink}>
-                        {post_content}
+                    <Link href={`/post/${_id}`} className={`${styles.PostLink} ${styles.hiddenText}`}>
+                        {decodeURIComponent(post_content)}
                     </Link>
                 }
                 {
                     type == 'DETAIL' &&
                     <p className={styles.PostLink}>
-                        {post_content}
+                        {decodeURIComponent(post_content)}
                     </p>
                 }
             </div>
@@ -75,7 +98,13 @@ const Post = ({post_creator, post_content, _id, createdAt, likes, replies, type}
                         <i className="fa-solid fa-comment">{replies}</i>
                     </button>
                 </div>
-                <button className={styles.DeletePostButton}>Delete</button>
+
+                { isOwner &&
+                    <button onClick={deletePost} className={styles.DeletePostButton}>
+                        Delete
+                        <i className="fa-solid fa-trash-can"></i>
+                    </button>
+                }
             </div>
 
         </div>

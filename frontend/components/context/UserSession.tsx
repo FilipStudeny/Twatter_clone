@@ -15,18 +15,21 @@ interface IUserSessionContext {
   username: string;
   login: (data: LoginData) => void;
   logout: () => void;
+  user_id: string,
 }
 
 const UserSessionContext = createContext<IUserSessionContext>({
   isLoggedIn: false,
   username: '',
   login: () => {},
-  logout: () => {}
+  logout: () => {},
+  user_id: ''
 });
 
 const UserSessionProvider = () => {
     const [username, setUsername] = useState<string>("");
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+    const [user_id, setUserId] = useState<string>("");
     const router = useRouter();
   
     useEffect(() => {
@@ -36,6 +39,7 @@ const UserSessionProvider = () => {
       if (token && userData) {
         const parsedData: LoginData = JSON.parse(userData);
         setUsername(parsedData.username);
+        setUserId(parsedData.user_id)
         setIsLoggedIn(true);
       } 
     
@@ -45,6 +49,7 @@ const UserSessionProvider = () => {
       const userData: LoginData = data;
   
       setUsername(userData.username);
+      setUserId(userData.user_id);
       setIsLoggedIn(true)
   
       localStorage.setItem('token', userData.token);
@@ -54,17 +59,16 @@ const UserSessionProvider = () => {
     };
   
     const logout = () => {
-      const name = "";
-      const loggedIn = false;
-    
+
       localStorage.removeItem('token');
       localStorage.removeItem('userData');
-    
-      setUsername(name);
-      setIsLoggedIn(loggedIn);
+
+      setUserId("");
+      setUsername("");
+      setIsLoggedIn(false);
     }
   
-    return { username, isLoggedIn, login, logout}
+    return { username, isLoggedIn, login, logout, user_id}
 };
 
 export { UserSessionProvider, UserSessionContext };
