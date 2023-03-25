@@ -5,6 +5,8 @@ import Image from 'next/image'
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import style from '../../styles/Profile.module.css'
 import styles2 from '../../styles/404.module.css'
+import modalStyle from '../../styles/Modal.module.css';
+
 import Post, { PostDataProps as PostData} from '../../components/Post';
 import { Comment } from '@/components/Comment';
 import { useRouter } from 'next/router';
@@ -35,6 +37,12 @@ const Profile = () => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isOwner, setIsOwner] = useState<boolean>(false);
     const router = useRouter();
+
+    const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
+
+    const openModal = (state: boolean) => {
+        setModalIsOpen(state)
+    }
 
     const setSearchOption = (searchFor: DataToFetch) => {
         let searchOption = '';
@@ -108,8 +116,41 @@ const Profile = () => {
         )
     }
 
+    const [profilePicture, setProfilePicture] = useState<any>(); 
+
     return (
         <>
+            
+
+            { modalIsOpen && 
+                <Modal onCancel={() => {openModal(!modalIsOpen); setProfilePicture("")}}>
+                    <div className={modalStyle.ModalHeader}>
+                        <h2 className={modalStyle.ModalTitle}>Profile picture editor</h2>
+                        <button className={modalStyle.CloseButton} onClick={() => {openModal(!modalIsOpen);  setProfilePicture("")}}>
+                            <i className="fa-solid fa-xmark"></i>                      
+                        </button>
+                    </div>
+                    <div className={modalStyle.ModalContent}>
+                        <input id='imageInput' className={modalStyle.ImageInput} type={'file'} onClick={(e:any) => {
+                            e.stopPropagation();
+                        }} onChange={(e:any) => {;setProfilePicture(URL.createObjectURL(e.target.files[0]))}}></input>
+                        <label htmlFor='imageInput'>
+                            <div className={modalStyle.ImageContainer}>
+                                { !profilePicture &&
+                                    <i className="fa-solid fa-upload"></i>
+                                }
+                                { profilePicture &&
+                                    <Image className={modalStyle.ModalImage} src={profilePicture} width={100} height={100} alt={''}/>
+                                }
+                                
+                            </div>
+                        </label>
+                    </div>
+                    <div className={modalStyle.ModalFooter}>
+                        <button>Update profile picture</button>
+                    </div>
+                </Modal>
+            }
 
             <div>
                 <div className={style.ProfileHeader}>
@@ -125,11 +166,10 @@ const Profile = () => {
                             <div className={style.ProfilePictureContainer}>
                                 <Image className={style.ProfilePicture} src='/images/user_icon.png' width="512" height="512" alt='User profile image'/>
                                 {   isOwner &&
-                                    <button className={style.ProfilePictureCoverPhotoButton}>
+                                    <button onClick={() => openModal(!modalIsOpen)} className={style.ProfilePictureCoverPhotoButton}>
                                         <i className={`fa-solid fa-camera ${style.CameraCover}`}></i>
                                     </button>
                                 }
-                                
                             </div>
                             <h2>@{userSessionData.username}</h2>
                         </div>

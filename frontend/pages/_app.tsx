@@ -44,6 +44,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <UserSessionContext.Provider value={{ username, isLoggedIn, login, logout, user_id}}>
+
       <Script src="https://kit.fontawesome.com/a2c399c19b.js"></Script>
       <PageHeader />
       {pageToRender()}
