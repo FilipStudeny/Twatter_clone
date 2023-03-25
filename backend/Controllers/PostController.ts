@@ -20,8 +20,16 @@ export const route = express.Router();
 route.use(authorization);
 
 route.get("/allPosts", async (req: Request, res: Response, next: NextFunction) => {
+
+    let filter: any = {}
+    if(req.query.userID){
+        filter = { 
+            'post_creator': req.query.userID
+        }
+    }
+
     try {
-        const posts = await PostModel.find()
+        const posts = await PostModel.find(filter)
             .populate({ 
                 path: "post_creator", 
                 select: "username _id" 
@@ -156,7 +164,28 @@ route.post("/new", async (req: Request, res: Response, next: NextFunction) => {
     }
 });
   
+route.get("/:id/allComments", async (req: Request, res: Response, next: NextFunction) => {
 
+    const userID: any = req.params.id
+
+    try {
+
+        const user = await UserModel.findById(userID)
+        .populate('comments')
+        .sort({
+            "createdAt":-1 //Descending order
+        });
+
+        const userComments = user?.comments;
+        console.log(userComments)
+        return res.status(200).json(userComments)
+        
+    } catch (error) {
+        console.log(error);
+        return res.status(400).send({ error: "Bad Request: Comments can't be loaded !" });
+    }
+    
+});
 
 route.post("/:id/newComment", async (req: Request, res: Response, next: NextFunction) => {
     interface RequestData {
@@ -172,7 +201,8 @@ route.post("/:id/newComment", async (req: Request, res: Response, next: NextFunc
 
     interface Comment{
         comment: string,
-        creator: string
+        creator: string,
+        post_id: string
     }
 
     const requestData: RequestData = {
@@ -183,7 +213,8 @@ route.post("/:id/newComment", async (req: Request, res: Response, next: NextFunc
 
     const comment: Comment = {
         comment: requestData.comment,
-        creator: requestData.token.user_id
+        creator: requestData.token.user_id,
+        post_id: requestData.postID
     }
 
     try {

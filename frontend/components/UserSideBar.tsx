@@ -18,7 +18,7 @@ function UserSideBar() {
                 </div>
                 {
                     userSessionData.isLoggedIn &&
-                    <Link href={`/profile/user/${userSessionData.username}`} className={styles.Username}>{userSessionData.username}</Link>
+                    <Link href={`/profile/${userSessionData.user_id}`} className={styles.Username}>{userSessionData.username}</Link>
                 }
 
                 <div className={styles.Menu}>
@@ -32,7 +32,7 @@ function UserSideBar() {
                     <Link href='/messages'>
                         <i className="fa-solid fa-message"></i> 
                     </Link>
-                    <Link href={`/profile/${userSessionData.username}`}>
+                    <Link href={`/profile/${userSessionData.user_id}`}>
                         <i className="fa-solid fa-user"></i>
                     </Link>
                     <Link href='/settings'>
