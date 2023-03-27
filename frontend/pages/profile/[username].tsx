@@ -1,7 +1,6 @@
 
 import { UserSessionContext } from '@/components/context/UserSession';
 
-import Image from 'next/image'
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import style from '../../styles/Profile.module.css'
 import styles2 from '../../styles/404.module.css'
@@ -11,6 +10,8 @@ import Post, { PostDataProps as PostData} from '../../components/Post';
 import { Comment } from '@/components/Comment';
 import { useRouter } from 'next/router';
 import Modal from '@/components/modal/Modal';
+import ReactCrop, { Crop } from 'react-image-crop';
+import "react-image-crop/dist/ReactCrop.css";
 
 enum DataToFetch {
     Posts = "Posts",
@@ -42,6 +43,11 @@ const Profile = () => {
 
     const openModal = (state: boolean) => {
         setModalIsOpen(state)
+
+        if(!state){
+            setSrc("")
+
+        }
     }
 
     const setSearchOption = (searchFor: DataToFetch) => {
@@ -117,11 +123,68 @@ const Profile = () => {
     }
 
     const [profilePicture, setProfilePicture] = useState<any>(); 
+    const [src, setSrc] = useState<string>("");
+    const [crop, setCrop] = useState<any>({
+        unit: 'px',
+        width: 50,
+        height: 50,
+        x: 25,
+        y: 25,
+        aspect: 1 / 1,
+        circularCrop: true
+    });
+    const [croppedImageUrl, setCroppedImageUrl] = useState<string>("");
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+    
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const base64Url = event.target?.result as string;
+          setSrc(base64Url);
+        };
+        reader.readAsDataURL(file);
+    };
+    
+    const handleCropChange = (crop: Crop) => {
+        setCrop(crop);
+    };
+    
+    const handleCropComplete = (crop: Crop) => {
+        if (!src) return;
+    
+        const image = new Image();
+        image.src = src;
+    
+        const canvas = document.createElement("canvas");
+        canvas.width = crop.width ?? 0;
+        canvas.height = crop.height ?? 0;
+    
+        const context = canvas.getContext("2d");
+        if (context) {
+          context.drawImage(
+            image,
+            crop.x ?? 0,
+            crop.y ?? 0,
+            crop.width ?? 0,
+            crop.height ?? 0,
+            0,
+            0,
+            crop.width ?? 0,
+            crop.height ?? 0
+          );
+    
+          const croppedImageUrl = canvas.toDataURL("image/png");
+          setCroppedImageUrl(croppedImageUrl);
+        }
+      
+    };
+    
+    console.log(croppedImageUrl)
 
     return (
         <>
-            
-
             { modalIsOpen && 
                 <Modal onCancel={() => {openModal(!modalIsOpen); setProfilePicture("")}}>
                     <div className={modalStyle.ModalHeader}>
@@ -131,20 +194,33 @@ const Profile = () => {
                         </button>
                     </div>
                     <div className={modalStyle.ModalContent}>
-                        <input id='imageInput' className={modalStyle.ImageInput} type={'file'} onClick={(e:any) => {
-                            e.stopPropagation();
-                        }} onChange={(e:any) => {;setProfilePicture(URL.createObjectURL(e.target.files[0]))}}></input>
-                        <label htmlFor='imageInput'>
-                            <div className={modalStyle.ImageContainer}>
-                                { !profilePicture &&
-                                    <i className="fa-solid fa-upload"></i>
-                                }
-                                { profilePicture &&
-                                    <Image className={modalStyle.ModalImage} src={profilePicture} width={100} height={100} alt={''}/>
-                                }
-                                
-                            </div>
-                        </label>
+                        <div>
+                            <input id='imageInput' className={modalStyle.ImageInput} type={'file'} onClick={(e:any) => {
+                                e.stopPropagation();
+                            }} onChange={(e:any) => { handleFileChange(e); }}></input>
+
+                            { !src &&
+                                <label htmlFor='imageInput'>
+                                    <div className={modalStyle.ImageContainer}>
+                                        <i className="fa-solid fa-upload"></i>
+                                    </div>
+                                </label> 
+                            } 
+                            { src && 
+                                <div className={modalStyle.ImageContainer}>
+                                    <ReactCrop crop={crop} onComplete={handleCropComplete} onChange={handleCropChange}>
+                                        <img src={src}/>
+                                    </ReactCrop>
+                                </div>
+                               
+                            }     
+                            { croppedImageUrl &&
+
+                                <div className={modalStyle.ImageContainer}>
+                                    <img src={croppedImageUrl} alt="Cropped Image"/>
+                                </div>
+                            }              
+                        </div>
                     </div>
                     <div className={modalStyle.ModalFooter}>
                         <button>Update profile picture</button>
@@ -164,7 +240,7 @@ const Profile = () => {
                     <div className={style.ProfileHeaderData}>
                         <div className={style.UserData}>
                             <div className={style.ProfilePictureContainer}>
-                                <Image className={style.ProfilePicture} src='/images/user_icon.png' width="512" height="512" alt='User profile image'/>
+                                <img className={style.ProfilePicture} src='/images/user_icon.png' width="512" height="512" alt='User profile image'/>
                                 {   isOwner &&
                                     <button onClick={() => openModal(!modalIsOpen)} className={style.ProfilePictureCoverPhotoButton}>
                                         <i className={`fa-solid fa-camera ${style.CameraCover}`}></i>

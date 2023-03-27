@@ -96,14 +96,18 @@
         justify-content: center;
 
         cursor: pointer;
-
     }
 
     .ImageContainer:hover{
         background-color: whitesmoke;
         border-radius: 15px;
-        
     }
+
+        .CroppedImage{
+            width: 250px;
+            height: 250px;
+            margin-left: 10px;
+        }
 
     .ImageContainer>i{
         position: absolute;
