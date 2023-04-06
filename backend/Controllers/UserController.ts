@@ -3,10 +3,14 @@ import bcrypt from 'bcrypt';
 import User, { UserModel } from "../Models/User";
 import jwt, { Jwt } from "jsonwebtoken";
 
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import { authorization } from "../Middleware/authorization";
+
 export const route = express.Router();
 
 // *** ROUTES *** //
-
 route.get("/users", async (req:Request, res: Response, next: NextFunction) => {
     try {
         const users = await UserModel.find({}, "_id username profilePicture")
@@ -20,6 +24,25 @@ route.get("/users", async (req:Request, res: Response, next: NextFunction) => {
         res.status(500).send({ error: "Internal Server Error" });
     }
 })
+
+route.get("/user/:id", async (req:Request, res: Response, next: NextFunction) => {
+    const userID = req.params.id;
+
+    try {
+        const users = await UserModel.findById(userID, "-password -comments -posts")
+        res.status(200).json(users);
+    } catch (err) {
+        console.log(err);
+        res.status(500).send({ error: "Internal Server Error" });
+    }
+})
+
+
+route.get('/uploads/users/:image', (req: Request, res: Response, next: NextFunction) => {
+    res.sendFile(path.join(__dirname, `../uploads/users/${req.params.image}`))
+})
+
+
 
 route.post("/login", async (req:Request, res: Response, next: NextFunction) => {
 
@@ -139,4 +162,56 @@ route.post("/register", async (req: Request, res: Response, next: NextFunction) 
         console.log(err);
         return res.status(500).send({ error: "Internal Server Error: Something went wrong, try again !" });
     }
+});
+
+
+
+// USER UPDATES
+
+// configure Multer to store uploaded files in the "uploads/" directory
+const fileUpload = multer({
+    dest: "uploads/users/"
+})
+
+route.post("/profile/newProfileImage", fileUpload.single("croppedImage"), authorization, async (req: Request, res: Response, next: NextFunction) => {
+
+    // retrieve user data from decoded token
+    interface RequestData {
+        "token": {
+            "user_id": string;
+            "username": string;
+            "email": string;
+            "iat": number;
+        };
+    }
+    const requestData: RequestData = {
+        token: req.decodedToken,
+    };
+
+    // check if a file was uploaded
+    if (!req.file) {
+        console.log("No file uploaded")
+        return res.sendStatus(400);
+    }
+
+    //Save and move file to correct location
+    const filePath = `/uploads/users/${req.file.filename}.png`;
+    const pictureName = `${req.file.filename}.png`;
+    const temporaryPath = req.file.path;
+    const targetPath = path.join(__dirname, `../${filePath}`);
+
+    fs.rename(temporaryPath, targetPath, async (err) => {
+        if(err != null){
+            console.log(err)
+            return res.sendStatus(400);
+        }
+
+        // Update user profile picture
+        const updatedUser = await UserModel.findByIdAndUpdate(requestData.token.user_id, { 'profilePicture': pictureName });
+        
+        return res.status(200).send(updatedUser);
+    });
+
+    return
+
 });

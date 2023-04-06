@@ -67,7 +67,7 @@ const Post = ({post_creator, post_content, _id, createdAt, likes, replies, type,
     return (
         
         <div key={_id} className={styles.Post} id={_id}>
-            <Link href={`/profile/${post_creator.username}`} className={styles.PostHeader}>
+            <Link href={`/profile/${post_creator._id}`} className={styles.PostHeader}>
                 <Image className={styles.PostUserImage} src='/images/user_icon.png' width="512" height="512" alt='User profile image'/>
                 <div>
                     <h2>{post_creator.username}</h2>
