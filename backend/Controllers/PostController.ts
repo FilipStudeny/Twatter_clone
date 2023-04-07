@@ -167,7 +167,6 @@ route.post("/new", async (req: Request, res: Response, next: NextFunction) => {
 route.get("/:id/allComments", async (req: Request, res: Response, next: NextFunction) => {
 
     const userID: any = req.params.id
-
     try {
 
         const user = await UserModel.findById(userID)
@@ -177,7 +176,6 @@ route.get("/:id/allComments", async (req: Request, res: Response, next: NextFunc
         });
 
         const userComments = user?.comments;
-        console.log(userComments)
         return res.status(200).json(userComments)
         
     } catch (error) {

@@ -2,10 +2,10 @@ import Link from 'next/link'
 import React, { useContext } from 'react'
 import styles from '../styles/PageHeader.module.css'
 import { UserSessionContext } from '@/components/context/UserSession'
+import { ProfilePictureContext } from './context/UserProfilePicture';
 
 
 function PageHeader() {
-
     const userSessionData = useContext(UserSessionContext);
 
     const displayAuthOptions = () => {

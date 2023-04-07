@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { UserSessionContext } from '@/components/context/UserSession';
 
 import React, { HTMLInputTypeAttribute, useCallback, useContext, useEffect, useRef, useState } from 'react'
@@ -16,6 +17,7 @@ import Head from 'next/head';
 import Cropper, { ReactCropperElement } from "react-cropper";
 import "cropperjs/dist/cropper.css";
 import Image from 'next/image';
+import { ProfilePictureContext } from '@/components/context/UserProfilePicture';
 
 enum DataToFetch {
     Posts = "Posts",
@@ -36,30 +38,32 @@ interface CommentData{
 
 const Profile = () => {
 
-    const [searchOption, setPostsSearch] = useState<String>('POSTS'); 
     const userSessionData = useContext(UserSessionContext);
-    const [data, setData] = useState<any>([]);
+
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [isOwner, setIsOwner] = useState<boolean>(false);
+
+    const [searchOption, setPostsSearch] = useState<String>('POSTS'); 
+    const [data, setData] = useState<any>([]);
     const router = useRouter();
 
     const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
-    const [newImage, setNewImage] = useState<string>("");
+
+    // CROPPER STUFF
+    const [uploadedImage, setUploadedImage] = useState<string>("");
     const [croppedImage, setCroppedImage] = useState("/#");
     const cropperRef = useRef<any>();
 
-
+    // USER PROFILE DATA
     const [username, setUsername] = useState<string>("");
-    const [userID, setUserID] =  useState<any>("");
-    const [profilePictureName, setPorfilePictureName] =  useState<any>("");
-    const [profilePicture, setPorfilePicture] =  useState<any>("");
-
+    const [userID, setUserID] = useState<any>("");
+    const [isOwner, setIsOwner] = useState<boolean>(false);
+    const [userProfilePictureS, setUserProfilePicture] = useState<any>("");
 
     const openModal = (state: boolean) => {
         setModalIsOpen(state)
 
         if(!state){
-            setNewImage("");
+            setUploadedImage("");
             setCroppedImage("");
 
         }
@@ -70,104 +74,96 @@ const Profile = () => {
       
         if (searchFor === DataToFetch.Posts) {
           searchOption = 'POSTS';
-          fetchData(DataToFetch.Posts, userID);
+          fetchUserPostsOrComments(DataToFetch.Posts, userID);
         } else {
           searchOption = 'COMMENTS';
-          fetchData(DataToFetch.Comments, userID);
+          fetchUserPostsOrComments(DataToFetch.Comments, userID);
         }
       
         setPostsSearch(searchOption); 
     };
 
-    const fetchData = async (dataToFetch: DataToFetch, userID: any) => {
+    const fetchUserPostsOrComments = async (dataToFetch: DataToFetch, userID: any) => {
         setIsLoading(true);
+
         const payload = { 
-          'token': localStorage.getItem('token'),
-          'userID': userID
+            'token': localStorage.getItem('token'),
+            'userID': userID
+        }
+
+        let url = `http://localhost:8888/api/post/allPosts?userID=${userID}`;
+        if (dataToFetch === DataToFetch.Comments) {
+            url = `http://localhost:8888/api/post/${userID}/allComments`;
         }
         
-        let url = `http://localhost:8888/api/post/allPosts?userID=${payload.userID}`;
-        if (dataToFetch === DataToFetch.Comments) {
-            url = `http://localhost:8888/api/post/${payload.userID}/allComments`;
-        }
-      
         const response = await fetch(url, {     
-          method: "GET",
-          headers: {
-            "Authorization": 'Bearer ' + payload.token
-          },
+            method: "GET",
+            headers: {
+                "Authorization": 'Bearer ' + payload.token
+            },
         });
         
         const data: any = await response.json();
         setIsLoading(false);
-        setData(data);
+        setData(Array.isArray(data) ? data : []);
     }
-
+      
     const fetchUserData = async (userID: any) => {
         setIsLoading(true);
-
-        let url = `http://localhost:8888/api/user/user/${userID}`;
-        
-        const response = await fetch(url, {     
-          method: "GET",
-        });
-        
-        const data: any = await response.json();
-        setUsername(data.username)
-        setPorfilePictureName(data.profilePicture)
-
-        setIsLoading(false);
-
-
-    }
-
-    useEffect(() => {
-        fetchProfilePicture()
-    }, []);
-
       
-    const fetchProfilePicture = async () => {
-
-        console.log(profilePictureName)
+        try {
+            const userDataUrl = `http://localhost:8888/api/user/user/${userID}`;
+            const userDataResponse = await fetch(userDataUrl, { method: 'GET' });
+            const userData = await userDataResponse.json();
         
-        let url = `http://localhost:8888/api/user/uploads/users/${profilePictureName}`;
-     
-        const response = await fetch(url, {     
-          method: "GET",
+            setUsername(userData.username);
+            setUserID(userData._id);
+            fetchProfilePicture(userData.profilePicture)
+
+        } catch (error) {
+            console.error(error);
+        }
+        setIsLoading(false);
+    };
+      
+    const fetchProfilePicture = async(profilePicture: string) => {
+
+        const url = `http://localhost:8888/api/user/uploads/users/${profilePicture}`
+        const response = await fetch(url, {
+            method: 'GET'
         });
 
-        setPorfilePicture(response);
-        console.log(response);
-
-
+        if (response.ok) {
+            const blob = await response.blob();
+            const objectUrl = URL.createObjectURL(blob);
+            setUserProfilePicture(objectUrl);
+        }            
     }
 
-    const getProfileID = useCallback(() => {
-        return router.query.username
-    }, [router.query.username])
-    
+    const getProfileID = useCallback(() => router.query.username, []);
     useEffect(() => {
         const userID = getProfileID();
-        setUserID(userID);
-    
-        if (userID === userSessionData.user_id) {
-            setIsOwner(true)
+        setIsOwner(userSessionData.userId === userID);
+
+
+        if (userID === userSessionData.userId) {
+            setIsOwner(true);
         }
 
-        fetchUserData(userID)
-        fetchData(DataToFetch.Posts, userID);
-    }, [getProfileID, userSessionData.user_id]);
-
+        setUserID(userID);
+        fetchUserData(userID);
+        fetchUserPostsOrComments(DataToFetch.Posts, userID);
+    }, [getProfileID, userSessionData.userId]);
 
     const renderComment = (_id:string, comment:string, createdAt:string, postID:any) => {
-        const isOwner = userSessionData.user_id === userSessionData.user_id
+        const isOwner = userSessionData.userId === userID
         return(
             <Comment
                 key={_id}
                 _id={_id}
                 creator={{
                     'username': userSessionData.username,
-                    '_id': userSessionData.user_id
+                    '_id': userSessionData.userId
                 }}
                 comment={comment}
                 isOwner={isOwner}
@@ -190,7 +186,7 @@ const Profile = () => {
 
         const reader: FileReader = new FileReader();
         reader.onload = () => {
-            setNewImage(reader.result as any)
+            setUploadedImage(reader.result as any)
         };
         reader.readAsDataURL(files[0]);
         
@@ -230,8 +226,7 @@ const Profile = () => {
                 return response.json();
             })
             .then(data => {
-                console.log(data);
-               
+                window.location.reload(); // Reload the page after profile picture is updated
             })
             .catch(error => {
                 console.error('There was an error!', error);
@@ -251,10 +246,10 @@ const Profile = () => {
             </Head>
 
             { modalIsOpen && 
-                <Modal onCancel={() => {openModal(!modalIsOpen); setCroppedImage(""); setNewImage("")}}>
+                <Modal onCancel={() => {openModal(!modalIsOpen); setCroppedImage(""); setUploadedImage("")}}>
                     <div className={modalStyle.ModalHeader}>
                         <h2 className={modalStyle.ModalTitle}>Update your profile picture</h2>
-                        <button className={modalStyle.CloseButton} onClick={() => {openModal(!modalIsOpen); setCroppedImage(""); setNewImage("");}}>
+                        <button className={modalStyle.CloseButton} onClick={() => {openModal(!modalIsOpen); setCroppedImage(""); setUploadedImage("");}}>
                             <i className="fa-solid fa-xmark"></i>                      
                         </button>
                     </div>
@@ -264,7 +259,7 @@ const Profile = () => {
                             <input id="imageInput" accept="image/*" className={modalStyle.ImageInput}
                                 type={'file'} onClick={(e) => { e.stopPropagation(); }}
                                 onChange={handleImageUpload}/>
-                            {!newImage && 
+                            {!uploadedImage && 
                                 <label htmlFor="imageInput">
                                 <div className={modalStyle.ImageContainer}>
                                     <i className="fa-solid fa-upload"></i>
@@ -272,7 +267,7 @@ const Profile = () => {
                                 </label>
                             }
                         </div>
-                        { newImage && 
+                        { uploadedImage && 
                             <div className={`${modalStyle.CropperContainer}`}>
                                 <Cropper
                                     style={{ height: 400, width: "50%"}}
@@ -281,7 +276,7 @@ const Profile = () => {
                                     initialAspectRatio={1}
                                     aspectRatio={1/1}
                                     preview=".img-preview"
-                                    src={newImage}
+                                    src={uploadedImage}
                                     viewMode={1}
                                     minCropBoxHeight={10}
                                     minCropBoxWidth={10}
@@ -296,7 +291,7 @@ const Profile = () => {
                         }
 
                         {
-                            croppedImage && newImage &&
+                            croppedImage && uploadedImage &&
                             <div className={`${modalStyle.CroppedImagesContainer}`}>
                                 <img src={`${croppedImage}`} className={modalStyle.CroppedProfilePicLarge} alt="Cropped large profile image" width={180} height={180} />                    
                                 <img src={`${croppedImage}`} className={modalStyle.CroppedProfilePicSmall}  alt="Cropped small profile image" width={100} height={100} />                    
@@ -305,7 +300,7 @@ const Profile = () => {
                         }
                     </div>
                     {
-                        newImage && 
+                        uploadedImage && 
                         <div className={modalStyle.ModalFooter}>
                             <button onClick={getCropData}>Crop Image</button>
                             <button onClick={updateProfilePicture}>Update profile picture</button>
@@ -326,7 +321,7 @@ const Profile = () => {
                     <div className={style.ProfileHeaderData}>
                         <div className={style.UserData}>
                             <div className={style.ProfilePictureContainer}>
-                                <Image className={style.ProfilePicture} src='/images/user_icon.png' width="512" height="512" alt='User profile image'/>
+                                <img className={style.ProfilePicture} src={`${userProfilePictureS}`} alt='User profile image'/>
                                 {   isOwner &&
                                     <button onClick={() => openModal(!modalIsOpen)} className={style.ProfilePictureCoverPhotoButton}>
                                         <i className={`fa-solid fa-camera ${style.CameraCover}`}></i>
@@ -363,8 +358,9 @@ const Profile = () => {
                                 </div>                    
                             </>
                         }
+                        
 
-                        { !isLoading && searchOption === 'POSTS' && data.map((post: PostData, index: string) => (
+                        { data && !isLoading && searchOption === 'POSTS' && data?.map((post: PostData, index: string) => (
                             <Post 
                                 key={index}
                                 _id={post._id}
@@ -374,11 +370,11 @@ const Profile = () => {
                                 replies={post.replies}
                                 createdAt={post.createdAt}
                                 type='POST'
-                                isOwner={userSessionData.user_id === post.post_creator._id}
+                                isOwner={userSessionData.userId === post.post_creator._id}
                             />
                         ))}
 
-                        { !isLoading  && searchOption === 'COMMENTS' && data.map((comment: CommentData) => (
+                        { data && !isLoading  && searchOption === 'COMMENTS' && data?.map((comment: CommentData) => (
                             renderComment(comment._id, comment.comment, comment.createdAt, comment.post_id)              
                         ))}
 

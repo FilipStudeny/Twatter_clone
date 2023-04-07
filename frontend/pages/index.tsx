@@ -63,6 +63,8 @@ const Home = () => {
                 body: body,
             })
             const newPost: PostData = await response.json();
+            newPost.isOwner = newPost.post_creator._id === localStorage.getItem('userID');
+
             setPosts([newPost, ...posts]); // add the new post to the beginning of the posts array
             
             let textArea = (document.getElementById("NewPostForm") as HTMLTextAreaElement);
@@ -81,7 +83,7 @@ const Home = () => {
         const fetchPosts = async () => {
             setIsLoading(true);
             const payload = { 
-                'token': localStorage.getItem('token'),
+                'token': userSessionData.token,
             }
 
             const response = await fetch('http://localhost:8888/api/post/allPosts', {
@@ -93,6 +95,7 @@ const Home = () => {
 
             
             const data: PostData = await response.json();
+            console.log(data)
             setIsLoading(false);
             setPosts(data);
         }
@@ -143,7 +146,6 @@ const Home = () => {
                         replies={post.replies}
                         createdAt={post.createdAt}
                         type='POST'
-                        isOwner={userSessionData.user_id === post.post_creator._id}
                     />
                 ))}
             </div>

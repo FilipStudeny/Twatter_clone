@@ -75,6 +75,7 @@ const Login = () =>{
                 return;
             }else{
                 userSession.login(data)
+                router.push("/")
             }
         } else {
             setErrorMessage('There was an error submitting the form');
