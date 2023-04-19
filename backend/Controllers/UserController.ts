@@ -39,8 +39,19 @@ route.get("/user/:id", async (req:Request, res: Response, next: NextFunction) =>
 
 
 route.get('/uploads/users/:image', (req: Request, res: Response, next: NextFunction) => {
-    res.sendFile(path.join(__dirname, `../uploads/users/${req.params.image}`))
-})
+
+    const profilePicturePath = path.join(__dirname, `../uploads/users/${req.params.image}`);
+    fs.access(profilePicturePath, fs.constants.F_OK, (err) => {
+        if (err) {
+            // If the file doesn't exist, send a default image or a 404 status code
+            const defaultProfilePicturePath = path.join(__dirname, '../uploads/users/user_icon.png');
+            res.sendFile(defaultProfilePicturePath);
+            // or res.status(404).send('Profile image not found');
+        } else {
+            res.sendFile(profilePicturePath);
+        }
+    });
+});
 
 
 
@@ -207,9 +218,11 @@ route.post("/profile/newProfileImage", fileUpload.single("croppedImage"), author
         }
 
         // Update user profile picture
-        const updatedUser = await UserModel.findByIdAndUpdate(requestData.token.user_id, { 'profilePicture': pictureName });
-        
-        return res.status(200).send(updatedUser);
+        const updatedUser:any = await UserModel.findByIdAndUpdate(requestData.token.user_id, { 'profilePicture': pictureName });
+        console.log(updatedUser.profilePicture)
+        return res.status(200).send({
+            "profile_picture": updatedUser.profilePicture
+        });
     });
 
     return

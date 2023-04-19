@@ -1,22 +1,26 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import styles from '../styles/Comment.module.css'
+import { UserSessionContext } from './context/UserSession'
 
-interface CommentProps{
+export interface Comment{
     '_id': string,
-    'creator': {
-        'username': string,
-        '_id': string
-    },
     'comment': string,
-    'isOwner': boolean,
+    'creator': {
+        '_id': string
+        'username': string,
+        'profilePicture': string
+    },
     'createdAt': string,
-    'postID': string
+    'postID'?:string
 }
 
-export const Comment = ({ _id, creator, comment, isOwner, createdAt, postID } : CommentProps) => {
+export const Comment = ({ _id, creator, comment, createdAt, postID } : Comment) => {
+
+    const [isOwner, setIsOwner] = useState<boolean>(false)
+    const userSessionData = useContext(UserSessionContext);
 
     const likeButtonHeight = !isOwner ? styles.fullHeight : '';
     const deletButtonHeight = isOwner ? styles.fullHeight  : '';
@@ -58,6 +62,10 @@ export const Comment = ({ _id, creator, comment, isOwner, createdAt, postID } : 
 
         router.reload()
     }
+
+    useEffect(() => {
+        setIsOwner(userSessionData.userId === creator._id)
+    }, [])
     
 
     return (

@@ -32,7 +32,7 @@ route.get("/allPosts", async (req: Request, res: Response, next: NextFunction) =
         const posts = await PostModel.find(filter)
             .populate({ 
                 path: "post_creator", 
-                select: "username _id" 
+                select: "username _id profilePicture" 
                 })
             .sort({
                 "createdAt":-1 //Descending order
@@ -58,14 +58,7 @@ route.get("/post/:id", async (req:Request, res: Response, next: NextFunction) =>
         const post = await PostModel.findById(postID)
         .populate({
             path: "post_creator", 
-            select: "username _id" 
-            })
-        .populate({
-            path: "comments",
-            populate: {
-                path: "creator",
-                select: "username _id"
-            }
+            select: "username _id profilePicture" 
         })
         .sort({
             "createdAt":-1 //Descending order
@@ -78,6 +71,37 @@ route.get("/post/:id", async (req:Request, res: Response, next: NextFunction) =>
         return res.status(400).send({ error: "Bad Request: Post can't be loaded!" });
     }
 })
+
+route.get("/post/:id/comments", async (req:Request, res: Response, next: NextFunction) => {
+
+    const postID: string = req.params.id;
+
+    if(!postID || postID == undefined || postID == ""){
+        return res.status(400).send({ error: "Bad Request: New Post data not sent, try again!" });
+    }
+
+    try {
+        const comments: any = await PostModel.findById(postID)
+        .populate({
+            path: "comments",
+            select: "comment creator createdAt",
+            populate: {
+                path: "creator",
+                select: "username _id profilePicture" 
+            }
+        })
+        .sort({
+            "createdAt":-1 //Descending order
+        });
+
+        return res.status(200).send(comments.comments); // Return only the comments array
+        
+    } catch (error) {
+        console.log(error);
+        return res.status(400).send({ error: "Bad Request: Post can't be loaded!" });
+    }
+})
+
 
 route.delete("/:id/delete", async (req:Request, res: Response, next: NextFunction) => {
 
@@ -170,7 +194,14 @@ route.get("/:id/allComments", async (req: Request, res: Response, next: NextFunc
     try {
 
         const user = await UserModel.findById(userID)
-        .populate('comments')
+        .populate({
+            path: "comments",
+            select: "comment creator createdAt",
+            populate: {
+                path: "creator",
+                select: "username _id profilePicture" 
+            }
+        })        
         .sort({
             "createdAt":-1 //Descending order
         });

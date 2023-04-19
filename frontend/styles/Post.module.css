@@ -29,6 +29,14 @@
         background-color: whitesmoke;
         border-radius: 50%;
         box-shadow: 0px 0px 5px black;
+
+        font-size: 10px;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
     }
 
     .PostHeader>div{
@@ -60,7 +68,7 @@
         text-overflow: ellipsis;
         display: -webkit-box;
         -webkit-box-orient: vertical;
-        -webkit-line-clamp: 3;
+        -webkit-line-clamp: 4;
     }
 
     .PostLink{

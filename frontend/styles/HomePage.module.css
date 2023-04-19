@@ -50,9 +50,10 @@
     border-radius: 10px;
     border: none;
 
-    color: var(--greyText);
+    color: var(--textColor);
+    font-weight: 500;
 
-    background-color: rgb(236, 236, 236);
+    background-color: rgb(240, 240, 240);
 }
 
 .FormToolBar{

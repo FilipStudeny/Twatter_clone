@@ -40,10 +40,10 @@ export default function App({ Component, pageProps }: AppProps) {
     );
   };
 
-  const { username, isLoggedIn, login, logout, userId, profilePicture, token } = UserSessionProvider();
+  const { username, isLoggedIn, login, logout, userId, profilePicture, token, setProfilePicture } = UserSessionProvider();
 
   return (
-    <UserSessionContext.Provider value={{ username, isLoggedIn, login, logout, userId, profilePicture, token}}>
+    <UserSessionContext.Provider value={{ username, isLoggedIn, login, logout, userId, profilePicture, token, setProfilePicture }}>
 
       <Script src="https://kit.fontawesome.com/a2c399c19b.js"></Script>
       <PageHeader />

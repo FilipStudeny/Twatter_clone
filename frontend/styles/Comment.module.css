@@ -87,6 +87,8 @@
     .CommentBody>p{
         color: var(--textColor);
         font-size: 20px;
+        font-weight: 300;
+        
         text-align: justify;
         overflow-y: auto;
 

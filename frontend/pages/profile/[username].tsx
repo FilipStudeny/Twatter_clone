@@ -1,12 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
-import { UserSessionContext } from '@/components/context/UserSession';
+import { LoginData, UserSessionContext } from '@/components/context/UserSession';
 
 import React, { HTMLInputTypeAttribute, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import style from '../../styles/Profile.module.css'
 import styles2 from '../../styles/404.module.css'
 import modalStyle from '../../styles/Modal.module.css';
 
-import Post, { PostDataProps as PostData} from '../../components/Post';
+import Post, { PostData } from '../../components/Post';
 import { Comment } from '@/components/Comment';
 import { useRouter } from 'next/router';
 import Modal from '@/components/modal/Modal';
@@ -16,24 +16,10 @@ import Head from 'next/head';
 
 import Cropper, { ReactCropperElement } from "react-cropper";
 import "cropperjs/dist/cropper.css";
-import Image from 'next/image';
-import { ProfilePictureContext } from '@/components/context/UserProfilePicture';
 
 enum DataToFetch {
     Posts = "Posts",
     Comments = "Comments"
-}
-
-interface CommentData{
-    '_id': string,
-    'creator': {
-        'username': string,
-        '_id': string
-    },
-    'comment': string,
-    'isOwner': boolean,
-    'createdAt': string,
-    'post_id': string
 }
 
 const Profile = () => {
@@ -155,25 +141,6 @@ const Profile = () => {
         fetchUserPostsOrComments(DataToFetch.Posts, userID);
     }, [getProfileID, userSessionData.userId]);
 
-    const renderComment = (_id:string, comment:string, createdAt:string, postID:any) => {
-        const isOwner = userSessionData.userId === userID
-        return(
-            <Comment
-                key={_id}
-                _id={_id}
-                creator={{
-                    'username': userSessionData.username,
-                    '_id': userSessionData.userId
-                }}
-                comment={comment}
-                isOwner={isOwner}
-                createdAt={createdAt}
-                postID={postID}
-            />
-        )
-    }
-
-
     const handleImageUpload = (e: any) => {
         e.preventDefault();
         let files;
@@ -210,7 +177,8 @@ const Profile = () => {
         canvas.toBlob((imageBlob: any) => {
             const formData = new FormData();
             formData.append("croppedImage", imageBlob);
-        
+            localStorage.setItem('profileImage', URL.createObjectURL(imageBlob));
+
             fetch("http://localhost:8888/api/user/profile/newProfileImage", {
                 method: "POST",
                 headers: {
@@ -223,10 +191,21 @@ const Profile = () => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
+
                 return response.json();
             })
             .then(data => {
-                window.location.reload(); // Reload the page after profile picture is updated
+                console.log(data)
+                const storageUserData: any = localStorage.getItem('userData')
+                let userData: LoginData = JSON.parse(storageUserData);
+                userData.profile_picture = data.profile_picture;
+                localStorage.setItem('userData', JSON.stringify(userData));
+
+                const objectUrl = URL.createObjectURL(imageBlob);
+                setUserProfilePicture(objectUrl)
+                userSessionData.setProfilePicture(objectUrl);
+                localStorage.setItem('profileImage', objectUrl);
+
             })
             .catch(error => {
                 console.error('There was an error!', error);
@@ -370,12 +349,17 @@ const Profile = () => {
                                 replies={post.replies}
                                 createdAt={post.createdAt}
                                 type='POST'
-                                isOwner={userSessionData.userId === post.post_creator._id}
                             />
                         ))}
 
-                        { data && !isLoading  && searchOption === 'COMMENTS' && data?.map((comment: CommentData) => (
-                            renderComment(comment._id, comment.comment, comment.createdAt, comment.post_id)              
+                        { data && !isLoading  && searchOption === 'COMMENTS' && data?.map((comment: Comment) => (
+                            <Comment 
+                                key={comment._id}
+                                _id={comment._id} 
+                                comment={comment.comment} 
+                                creator={comment.creator}
+                                createdAt={comment.createdAt}                
+                            />
                         ))}
 
                     </div>

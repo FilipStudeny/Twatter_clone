@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import { useContext, useEffect, useState } from 'react';
-import Post, { PostDataProps as PostData} from '../components/Post';
+import Post, { PostData } from '../components/Post';
 import styles from '../styles/HomePage.module.css'
 import styles2 from '../styles/404.module.css'
 import { UserSessionContext } from '@/components/context/UserSession';
@@ -63,8 +63,6 @@ const Home = () => {
                 body: body,
             })
             const newPost: PostData = await response.json();
-            newPost.isOwner = newPost.post_creator._id === localStorage.getItem('userID');
-
             setPosts([newPost, ...posts]); // add the new post to the beginning of the posts array
             
             let textArea = (document.getElementById("NewPostForm") as HTMLTextAreaElement);
@@ -93,15 +91,13 @@ const Home = () => {
                 },
             })
 
-            
-            const data: PostData = await response.json();
-            console.log(data)
+            const data: any = await response.json();
+
             setIsLoading(false);
             setPosts(data);
         }
 
         fetchPosts();
-        
     }, []);
   
     return (

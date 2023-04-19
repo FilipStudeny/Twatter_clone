@@ -168,7 +168,7 @@
     height: auto;
     padding: 10px 10px 10px 10px;
 
-    background-color: var(--redBackground);
+    background-color: var(--red);
     margin-bottom: 10px;
 }
 
@@ -177,7 +177,9 @@
 
     font-size: 18px;
     font-weight: 500;
-    color: var(--text);
+    color: white;
+
+    text-align: center;
 }
 
 .disabled{

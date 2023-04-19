@@ -1,10 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
-import Image from 'next/image'
 import Link from 'next/link'
-import React, { useContext } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import styles from '../styles/PageHeader.module.css'
 import { UserSessionContext } from '@/components/context/UserSession'
-import { ProfilePictureContext } from './context/UserProfilePicture'
 
 
 function UserSideBar() {
@@ -14,7 +12,7 @@ function UserSideBar() {
         <>
             <div className={styles.UserSideBar}>
                 <div className={styles.UserImage}>
-                    <img className={styles.SideBarUserImage} src={`${userSessionData.profilePicture}`} width="512" height="512" alt='User profile image'/>
+                    <img className={styles.SideBarUserImage} src={`${localStorage.getItem('profileImage')}`} width="512" height="512" alt='User profile image'/>
                 </div>
                 {
                     userSessionData.isLoggedIn &&

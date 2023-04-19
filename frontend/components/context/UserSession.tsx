@@ -1,7 +1,7 @@
 import { createContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 
-interface LoginData {
+export interface LoginData {
     token: string; 
     user_id: string;
     username: string;
@@ -17,7 +17,9 @@ interface IUserSessionContext {
     login: (data: LoginData) => void;
     logout: () => void;
     userId: string,
-    token: string
+    token: string,
+    setProfilePicture: any
+
 }
 
 const UserSessionContext = createContext<IUserSessionContext>({
@@ -27,7 +29,8 @@ const UserSessionContext = createContext<IUserSessionContext>({
     login: () => {},
     logout: () => {},
     userId: '',
-    token: ''
+    token: '',
+    setProfilePicture: () => {}
 });
 
 const UserSessionProvider = () => {
@@ -64,6 +67,7 @@ const UserSessionProvider = () => {
             const blob = await response.blob();
             const objectUrl = URL.createObjectURL(blob);
             setProfilePicture(objectUrl);
+            localStorage.setItem('profileImage', objectUrl);
         }            
     }
 
@@ -77,8 +81,6 @@ const UserSessionProvider = () => {
         setUserId(data.user_id);
         setProfilePicture(data.profile_picture);
         setToken(data.token);
-
-
         fetchProfilePicture(data.profile_picture);
 
         setIsLoggedIn(true);
@@ -89,6 +91,7 @@ const UserSessionProvider = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('userData');
         localStorage.removeItem('userID');
+        localStorage.removeItem('profileImage');
 
         setUsername("");
         setUserId("");
@@ -100,7 +103,7 @@ const UserSessionProvider = () => {
 
     }
     
-    return { username, isLoggedIn, login, logout, userId, profilePicture, token}
+    return { username, isLoggedIn, login, logout, userId, profilePicture, token, setProfilePicture }
 };
 
-export { UserSessionProvider, UserSessionContext };
+export { UserSessionProvider, UserSessionContext  };

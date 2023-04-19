@@ -18,7 +18,7 @@ const userSchema = new Schema<User>({
     'firstName': { type: String, required: true, trim: true },
     'lastName': { type: String, required: true, trim: true },
     'email': { type: String, required: true, trim: true, unique: true },
-    'profilePicture': { type: String, default: "/images/user.png" },
+    'profilePicture': { type: String, default: "user_icon.png" },
     'password': { type: String, required: true },
     'posts': [{ type: Schema.Types.ObjectId, ref: 'Post'}],
     'comments': [{ type: Schema.Types.ObjectId, ref: 'Comment'}]

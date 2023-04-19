@@ -44,7 +44,7 @@ const Login = () =>{
         event.preventDefault();
 
         if (!username || !password ) {
-            setErrorMessage('ERROR: Make sure all fields are populated')
+            setErrorMessage('Make sure all fields are populated')
             setShowErrorMessage(true)
             return
         }
@@ -67,10 +67,9 @@ const Login = () =>{
         }
         
         const data: any = await response.json();
-        console.log(data);
         if (response.ok) {
             if(data.error){
-                setErrorMessage(data.error);
+                setErrorMessage('There was an error submitting the form');
                 setShowErrorMessage(true);
                 return;
             }else{
@@ -78,7 +77,7 @@ const Login = () =>{
                 router.push("/")
             }
         } else {
-            setErrorMessage('There was an error submitting the form');
+            setErrorMessage("Account does not found.");
             setShowErrorMessage(true);
         }
     }
@@ -99,7 +98,7 @@ const Login = () =>{
                         </div>
                     </div>
                     <div className={`${styles.ErrorMessages} ${errorMessagesClass}`}>
-                        
+                        <p>{errorMessage}</p>
                     </div>
                     <button>Login in to your account</button>
                 </form>
